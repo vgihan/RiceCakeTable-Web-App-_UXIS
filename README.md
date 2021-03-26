@@ -1,6 +1,6 @@
-#peer to peer signaling success
+# peer to peer signaling success
 
--signaling 과정 (A와 B의 통신)
+- signaling 과정 (A와 B의 통신)
 1. A가 offer생성하여 RTCPeerConnection에 localDescription으로 저장하고, signaling Server로 전송.
 2. signaling Server는 B에게 A의 offer를 전송.
 3. A의 offer를 받은 B는 A의 offer를 RTCPeerConnection에 remoteDescription으로 저장.
