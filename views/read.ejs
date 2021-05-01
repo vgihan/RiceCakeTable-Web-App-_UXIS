@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebRTC-MySQL</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <h1><%= description %></h1>
+        <table border = "1">
+            <th>ID</th>
+            <th>NAME</th>
+            <th>ROOM</th>
+            <% for(var i=0; i < data.length; i++) { %>
+                <tr>
+                    <td><%=data[i].id %></td>
+                    <td><%=data[i].name %></td>
+                    <td><%=data[i].room_id %></td>
+                </tr>
+            <% } %>
+        </table>
+    </body>
+</html>

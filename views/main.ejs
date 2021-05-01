@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebRTC-MySQL</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <h1><%= description %></h1>
+        
+        <button type="button" onclick ="location.href='/read_process'">Read Database</button>
+
+        <form action="/write_process" method="post">
+            ID : <input type='text' name='_id'><br>
+            NAME : <input type='text' name='_name'><br>
+            ROOM : <input type='text' name='_room'><br>
+            <button type="submit">Write</button>
+        </form>
+
+        <form action="/update_process" method="post">
+            ID : <input type='text' name='_id'><br>
+            NAME : <input type='text' name='_name'><br>
+            ROOM : <input type='text' name='_room'><br>
+            <button type="submit">Update</button>
+        </form>
+
+        <form action="/delete_process" method="post">
+            ID : <input type='text' name='_id'><br>
+            <button type="submit">Delete</button>
+        </form>
+    </body>
+</html>
