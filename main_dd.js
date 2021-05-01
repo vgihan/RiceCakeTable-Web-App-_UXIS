@@ -1,4 +1,4 @@
-//DAO, DTO 사용한 것으로 CRUD 잘 되지만 <-> 웹에서 READ한 결과물을 읽어올수 없음 (이거빼고는 다 정상)
+/*DAO, DTO 사용한 것으로 CRUD 잘 되지만 <-> 웹에서 READ한 결과물을 읽어올수 없음 (이거빼고는 다 정상)*/
 
 const express = require('express');
 const app = express();
