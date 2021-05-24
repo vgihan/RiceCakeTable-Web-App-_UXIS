@@ -1,4 +1,4 @@
-const socket = io('https://localhost', {secure: true});
+const socket = io('https://edu.uxis.co.kr', {secure: true});
 
 window.addEventListener('load', () => {
     document.getElementsByClassName('wrap')[0].style.display = "none";
@@ -15,10 +15,19 @@ const pc_config = {
         //   'credentials': '[YOR CREDENTIALS]',
         //   'username': '[USERNAME]'
         // },
+	{
+            urls: "stun:edu.uxis.co.kr"
+        },
+        {
+            urls: "turn:edu.uxis.co.kr?transport=tcp",
+                    "username": "webrtc",
+                    "credential": "webrtc100!"
+        }
+
     ],
 }
 
-let sendPC = new RTCPeerConnection(pc_config);
+let sendPC;
 let receivePCs = {};
 let infoOfReceivers = {};
 let receiveVideos = {};
@@ -26,6 +35,8 @@ let receiveVideos = {};
 let userId;
 let roomId;
 let role;
+
+let nextVideoPos = [70, 20];
 
 function register(){
     document.getElementsByClassName('wrap')[0].style.display = "block";
@@ -42,53 +53,53 @@ function register(){
 
 function setVideoPosition(role, userId){
     var video;
-    if(role === 'teacher') {
-        video = document.createElement('video');
-        video.className = 'teacher_video';
-        video.autoplay = true;
-        document.getElementsByClassName('video')[0].appendChild(video);
-    } else if(role === 'student') {
-        var li = document.createElement('li');
-        li.className = userId;
-        var dt = document.createElement('dt');
-        var dd = document.createElement('dd');
-        var dl = document.createElement('dl');
-        var txt_bubble = document.createElement('div');
-        txt_bubble.className = 'txt_bubble';
-        var name_txt = document.createElement('p');
-        name_txt.className = 'name_txt';
-        name_txt.innerText = userId;
-        var id_txt = document.createElement('p');
-        id_txt.className = 'id_txt';
-        id_txt.innerText = userId;
-        video = document.createElement('video');
-        video.className = 'student_video';
-        video.autoplay = true;
+
+    video = document.createElement('video');
+    video.className = 'video_' + userId;
+    video.autoplay = true;
+	video.playsinline = true;
+    document.getElementsByClassName('video')[0].appendChild(video);
+    
+    var li = document.createElement('li');
+    li.className = userId;
+    var dt = document.createElement('dt');
+    var dd = document.createElement('dd');
+    var dl = document.createElement('dl');
+    var txt_bubble = document.createElement('div');
+    txt_bubble.className = 'txt_bubble';
+    var name_txt = document.createElement('p');
+    name_txt.className = 'name_txt';
+    name_txt.innerText = userId;
+    var id_txt = document.createElement('p');
+    id_txt.className = 'id_txt';
+    id_txt.innerText = userId;
         
-        var container = document.getElementsByClassName('students')[0];
+    var container = document.getElementsByClassName('students')[0];
         
-        dt.appendChild(video);
-        dd.appendChild(name_txt);
-        dd.appendChild(id_txt);
-        dl.appendChild(dt);
-        dl.appendChild(dd);
-        li.appendChild(txt_bubble);
-        li.appendChild(dl);
-        container.appendChild(li);
-    }
+    dd.appendChild(name_txt);
+    dd.appendChild(id_txt);
+    dl.appendChild(dt);
+    dl.appendChild(dd);
+    li.appendChild(txt_bubble);
+    li.appendChild(dl);
+    container.appendChild(li);
+
     return video;
 }
 
 function getUserMediaStream(){
     navigator.mediaDevices
         .getUserMedia({
+            audio: true,
             video: true,
         })
         .then((stream) => {
             const myVideo = setVideoPosition(role, userId);
-            myVideo.srcObject = stream;
-
-            var localStream = stream;
+            selfStream = new MediaStream();
+            selfStream.addTrack(stream.getTracks()[1]);
+            myVideo.srcObject = selfStream;
+            
+            localStream = stream;
 
             sendPC = createSenderPeerConnection(socket, localStream);
             createSenderOffer(socket);
@@ -102,21 +113,29 @@ function getUserMediaStream(){
         })
         .catch(error => {
             console.error(`getUserMedia error: ${error}`);
-        })
+        		
+            socket.emit("joinRoom", {
+                userId: userId,
+                senderSocketId: socket.id,
+                roomId: roomId,
+                role: role,
+            });
+		});
 }
 
 function createSenderPeerConnection(socket, stream) {
     let pc = new RTCPeerConnection(pc_config);
-
+/*
     pc.onicecandidate = (e) =>{
-        if(e.candidate) {
+        console.log("onicecandidate!");
+	if(e.candidate) {
             socket.emit("senderCandidate", {
                 candidate: e.candidate,
                 senderSocketId: socket.id,
             });
         }
     }
-
+*/
     pc.oniceconnectionstatechange = (e) => {
         //console.log(e);
     }
@@ -136,7 +155,7 @@ function createReceiverPeerConnection(socketId, socket, role, userId) {
     let pc = new RTCPeerConnection(pc_config);
     
     receivePCs[socketId] = pc;
-
+/*
     pc.onicecandidate = (e) => {
         if(e.candidate) {
             socket.emit("receiverCandidate", {
@@ -146,7 +165,7 @@ function createReceiverPeerConnection(socketId, socket, role, userId) {
             });
         }
     }
-
+*/
     pc.oniceconnectionstatechange = (e) =>{
         //console.log(e);
     }
@@ -155,7 +174,7 @@ function createReceiverPeerConnection(socketId, socket, role, userId) {
         if(receiveVideos[socketId]) return;
         receiveVideos[socketId] = setVideoPosition(role, userId);
         receiveVideos[socketId].srcObject = e.streams[0];
-        console.log(e.streams[0]);
+        console.log(e.streams[0].getTracks());
     }
 
     return pc;
@@ -166,14 +185,24 @@ async function createSenderOffer(socket){
         let sdp = await sendPC.createOffer({
             offerToReceiveAudio: false,
             offerToReceiveVideo: false,
-        })
+        });
         await sendPC.setLocalDescription(new RTCSessionDescription(sdp));
-
+	console.log("1");
         socket.emit("senderOffer", {
             sdp,
             senderSocketId: socket.id,
             roomId: roomId,
         });
+	
+    	sendPC.onicecandidate = (e) =>{
+			console.log("onicecandidate");
+        	if(e.candidate) {
+            	socket.emit("senderCandidate", {
+                	candidate: e.candidate,
+                	senderSocketId: socket.id,
+            	});
+        	}
+    	}
     } catch(error) {
         console.log(error);
     }
@@ -185,13 +214,23 @@ async function createReceiverOffer(pc, socket, senderSocketId, roomId) {
             offerToReceiveAudio: true,
             offerToReceiveVideo: true,
         });
-        pc.setLocalDescription(new RTCSessionDescription(sdp));
+        await pc.setLocalDescription(new RTCSessionDescription(sdp));
         socket.emit("receiverOffer", {
             sdp,
             receiverSocketId: socket.id,
             senderSocketId: senderSocketId,
             roomId: roomId,
         });
+							
+    	pc.onicecandidate = (e) => {
+    	    if(e.candidate) {
+    	        socket.emit("receiverCandidate", {
+    	            candidate: e.candidate,
+    	            receiverSocketId: socket.id,
+    	            senderSocketId: socketId,
+    	        });
+    	    }
+    	}
     } catch (error) {
         console.error(error);
     }
@@ -202,7 +241,6 @@ socket.on("getReceiverCandidate", (message) => {
         let pc = receivePCs[message.id];
         if(!message.candidate) return;
         pc.addIceCandidate(new RTCIceCandidate(message.candidate));
-        console.log("receiver candidate 등록 완료");
     } catch (error) {
         console.log(error);
     }
@@ -212,16 +250,15 @@ socket.on("getSenderCandidate", (message) => {
     try{
         if(!message.candidate) return;
         sendPC.addIceCandidate(new RTCIceCandidate(message.candidate));
-        console.log("sender candidate 등록 완료");
     } catch (error) {
         console.error(error);
     }
 });
 
 socket.on("getSenderAnswer", (message) => {
-    try {
+    try {	
+    	console.log("getSenderAnswer");
         sendPC.setRemoteDescription(new RTCSessionDescription(message.sdp));
-        console.log("getSenderAnswer Success");
     } catch (error) {
         console.error(error);
     }
@@ -230,8 +267,9 @@ socket.on("getSenderAnswer", (message) => {
 socket.on("getReceiverAnswer", async (message) => {
     try {
         let pc = receivePCs[message.id];
+        if(pc.signalingState === 'stable') return;
+        console.log(pc.signalingState);
         await pc.setRemoteDescription(new RTCSessionDescription(message.sdp));
-        console.log("getReceiverAnswer Success");
     } catch (error) {
         console.error(error);
     }
@@ -239,6 +277,7 @@ socket.on("getReceiverAnswer", async (message) => {
 
 socket.on("userEnter", (message) => {
     try {
+        console.log("userEnter!!!!!!!!!!!!");
         let pc = createReceiverPeerConnection(message.id, socket, message.role, message.userId);
         createReceiverOffer(pc, socket, message.id, roomId);
         infoOfReceivers[message.id] = {
@@ -254,13 +293,11 @@ socket.on("userExit", (message) => {
     receivePCs[message.id].close();
     delete receivePCs[message.id];
     var exitUserElement;
-    if(message.role === "teacher"){
-        exitUserElement = document.getElementsByClassName('teacher_video')[0];
-    } else if(message.role === "student") {
-        exitUserElement = document.getElementsByClassName(message.userId)[0];
-    }
+    exitUserElement = document.getElementsByClassName(message.userId)[0];
+    exitUserVideo = document.getElementsByClassName('video_' + message.userId)[0];
     exitUserElement.parentNode.removeChild(exitUserElement);
-})
+    exitUserVideo.parentNode.removeChild(exitUserVideo);
+});
 
 socket.on("allUsers", (message) => {
     let len = message.users.length;
@@ -268,5 +305,5 @@ socket.on("allUsers", (message) => {
         let pc = createReceiverPeerConnection(message.users[i].id, socket, message.users[i].role, message.users[i].userId);
         createReceiverOffer(pc, socket, message.users[i].id, message.users[i].roomId);
     }
-})
+});
 

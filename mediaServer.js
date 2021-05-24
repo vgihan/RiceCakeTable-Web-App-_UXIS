@@ -1,4 +1,3 @@
-const { info } = require('console');
 const express = require('express');
 const app = express();
 const fs = require('fs');
@@ -11,8 +10,8 @@ const wrtc = require('wrtc');
 app.use(express.static(__dirname));
 
 const options = {
-    key: fs.readFileSync('./keys/private.key'),
-    cert: fs.readFileSync('./keys/cert.crt')
+    key: fs.readFileSync('/etc/letsencrypt/live/edu.uxis.co.kr/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/edu.uxis.co.kr/cert.pem')
 };
 
 const server = https.createServer(options, app).listen(443, () => {
@@ -20,15 +19,7 @@ const server = https.createServer(options, app).listen(443, () => {
 });
 
 app.get('/', (request, response) => {
-    response.setHeader('Content-Type', 'text/html');
-    fs.readFile('index.html', (err, data) => {
-        if(err) {
-            console.log(err);
-            response.end();
-        } else {
-            response.end(data);
-        }
-    });
+    response.render('index.html');
 });
 
 //----------------------------------------------------
@@ -41,6 +32,8 @@ let users = {};
 let socketToRoom = {};
 let infoOfUsers = {};
 
+let ontrackSwitch = false;
+
 const pc_config = {
     iceServers: [
         // {
@@ -48,6 +41,14 @@ const pc_config = {
         //   'credentials': '[YOR CREDENTIALS]',
         //   'username': '[USERNAME]'
         // },
+        {
+            urls: "stun:edu.uxis.co.kr"
+        },
+        {
+            urls: "turn:edu.uxis.co.kr?transport=tcp",
+                    "username": "webrtc",
+                    "credential": "webrtc100!"
+        }
     ],
 }
 
@@ -57,7 +58,7 @@ io.on('connection', function(socket) {
     socket.on("senderOffer", async (message) => {
         try {
             socketToRoom[message.senderSocketId] = message.roomId;
-        
+            
             let pc = createReceiverPeerConnection(message.senderSocketId, socket, message.roomId);
             await pc.setRemoteDescription(message.sdp);
             let sdp = await pc.createAnswer({
@@ -68,7 +69,6 @@ io.on('connection', function(socket) {
 
             socket.join(message.roomId);
             io.to(message.senderSocketId).emit("getSenderAnswer", { sdp });
-            console.log("senderOffer Success");
         } catch (error) {
             console.error(error);
         }
@@ -76,7 +76,6 @@ io.on('connection', function(socket) {
 
     socket.on("receiverOffer", async (message) => {
         try {
-            console.log("receiverOffer");
             let pc = createSenderPeerConnection(
                 message.receiverSocketId,
                 message.senderSocketId,
@@ -110,6 +109,8 @@ io.on('connection', function(socket) {
     socket.on("receiverCandidate", async (message) => {
         try {
             let senderPC = senders[message.senderSocketId];
+			console.log(senderPC);
+			console.log(message.candidate);
             await senderPC[0].pc.addIceCandidate(new wrtc.RTCIceCandidate(message.candidate));
         } catch (error) {
             console.log("여긴가?" + error);
@@ -136,9 +137,6 @@ io.on('connection', function(socket) {
             deleteUser(socket.id, roomId);
             closeReceiverPC(socket.id);
             closeSenderPCs(socket.id);
-
-            console.log(infoOfUsers);
-            console.log(socket.id);
 
             if(!infoOfUsers[socket.id]) return;
 
@@ -197,9 +195,6 @@ function createSenderPeerConnection(receiverSocketId, senderSocketId, socket, ro
         //console.log(e);
     }
 
-    console.log("users[roomId]:");
-    console.log(users[roomId]);
-
     const sendUser = users[roomId].filter(user => user.id === senderSocketId);
     sendUser[0].stream.getTracks().forEach((track => {
         pc.addTrack(track, sendUser[0].stream);
@@ -224,8 +219,14 @@ function createReceiverPeerConnection(socketId, socket, roomId) {
     }
 
     pc.ontrack = (e) => {
-        console.log(socketId + ": ontrack!!!!!!");
+        console.log(e.streams[0]);
+        if(!ontrackSwitch) {
+            ontrackSwitch = true;
+            return;
+        }
+
         if(users[roomId]) {
+            if(users[roomId].filter(user => user.id == socketId) == []) return;
             users[roomId].push({
                 id: socketId,
                 stream: e.streams[0],
@@ -238,6 +239,7 @@ function createReceiverPeerConnection(socketId, socket, roomId) {
                 }
             ];
         }
+        console.log('유저확인', users[roomId]);
 
         socket.broadcast.to(roomId).emit("userEnter", { 
             id: socketId,
@@ -245,6 +247,7 @@ function createReceiverPeerConnection(socketId, socket, roomId) {
             role: infoOfUsers[socketId].role,
             roomId: roomId,
         });
+        ontrackSwitch = false;
     }
 
     return pc;
@@ -275,7 +278,8 @@ function closeSenderPCs(socketId) {
     for (let i = 0; i < len; i++) {
         senders[socketId][i].pc.close();
         let _senders = senders[senders[socketId][i].id];
-        let sender = _senders.filter(sPC => sPC.id === socketId);
+        if(!_senders) continue;
+		let sender = _senders.filter(sPC => sPC.id === socketId);
         if (sender[0]) {
             sender[0].pc.close();
             senders[senders[socketId][i].id] = _senders.filter(
