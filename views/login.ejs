@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="Generator" content="EditPlus®" />
+        <meta name="Author" content="" />
+        <meta name="Keywords" content="" />
+        <meta name="Description" content="" />
+        <title>BETTER TEACHING</title>
+        <!--css-->
+        <link rel="stylesheet" href="../css/reset.css" />
+        <link rel="stylesheet" href="../css/font.css" />
+        <link rel="stylesheet" href="../css/layout.css" />
+        <link rel="stylesheet" href="../css/jquery.mCustomScrollbar.min.css" />
+		<link rel="stylesheet" href="../css/slick.css" />
+        <!--js-->
+        <script src="../js/jquery-3.4.1.min.js"></script>
+		<script src="../js/slick.min.js"></script>
+        <script src="../js/jquery.mCustomScrollbar.js"></script>
+        <script src="../js/layout.js"></script>
+		<script src="../js/login.js"></script>
+    </head>
+    <body onload="noBack();" onpageshow="if(event.persisted) noBack();" onunload="">
+        <div class="wrap login">
+			<div class="inwrap">
+				<div class="login_w">
+					<form action="https://localhost/login" method="POST">
+						<h1 class="logo">
+							<img src="../img/logo.png" alt="better teaching"/>
+						</h1>
+						<div class="login_box">
+							<div class="lbox">
+								<input type="text" id="input_nm" name="input_nm" class="login_input" placeholder="참여자 이름" title="이름을 입력해주세요">
+							</div>
+							<div class="lbox">
+								<input type="text" id="input_rm" name="input_rm" class="login_input" placeholder="방번호" title="방번호를 입력해주세요">
+							</div>
+							<div class="lbox ptp_btn">
+								<input type="submit" value="참여하기">
+							</div>
+						</div>
+						<div class="new_r">
+							<a href="https://localhost/make-room">새로운 방만들기</a>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+    </body>
+</html>
