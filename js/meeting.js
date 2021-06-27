@@ -6,15 +6,32 @@ let receivePCs = {};    //받는 역할의 peerConnection 객체
 let receiveVideos = {}; //방안에 존재하는 user들에게서 스트림을 받기 위한 peerConnection 객체들
 let selfStream;     //자신의 비디오를 표시할 스트림
 
-const userName = document.getElementById('user_name').innerHTML;
-const roomId = document.getElementById('room_id').innerHTML;
-getUserMediaStream(userName, roomId);
+let numOfUsers;
+let roomLeader;
+
+onload();
+
+function onload() {
+    const userName = document.getElementById('user_name').innerHTML;
+    const roomId = document.getElementById('room_id').innerHTML;
+
+    socket.emit("roomInfo", {
+        roomId: roomId,
+        userName: userName
+    });
+
+    getUserMediaStream(userName, roomId);
+}
 
 //브라우저를 종료했을 때
 window.onbeforeunload = (e) => {
     socket.emit("disconnect");
 };
 window.history.forward();
+
+document.getElementsByClassName('refusal')[0].onclick = (e) => {
+    document.getElementsByClassName('chat_accept')[0].style = 'display: none;';
+};
 
 const pc_config = {
     iceServers: [
@@ -57,6 +74,7 @@ function setVideoPosition(userName, isLocal){
     a.tabIndex = "0";
     a.innerHTML = "1 : 1 대화신청";
     a.onclick = request_1_1;
+    a.id = userName;
     chat_1_1.className = "chat_1_1";
     nicknm.className = "nicknm";
     info_ctxt.className = "info_ctxt";
@@ -79,8 +97,11 @@ function setVideoPosition(userName, isLocal){
     return video;
 }
 
-function request_1_1() {
-    
+function request_1_1(e) {
+    socket.emit("request_1_1", {
+        socketId: socket.id,
+        target: e.target.id,
+    });
 }
 
 // user의 카메라와 마이크에 접근하여 스트림 받은 뒤 peerconnection 객체 생성하고 offer전송(통신 시작)
@@ -261,6 +282,10 @@ socket.on("userEnter", (message) => {
     try {
         let pc = createReceiverPeerConnection(message.socketId, message.userName);
         createReceiverOffer(pc, socket, message.socketId, message.roomId);
+
+        document.getElementsByClassName('c_r')[0].innerHTML = ++numOfUsers + '명';
+        document.getElementById('num_user_span').innerHTML = numOfUsers + '명';
+
         console.log("userEnter!!!!!!!!!!!!");
     } catch (error) {
         console.error(error);
@@ -271,6 +296,9 @@ socket.on("userEnter", (message) => {
 socket.on("userExit", (message) => {
     let socketId = message.id;
     let userName = message.userName;
+
+    document.getElementsByClassName('c_r')[0].innerHTML = --numOfUsers + '명';
+    document.getElementById('num_user_span').innerHTML = numOfUsers + '명';
 
     receivePCs[socketId].close();
     delete receivePCs[socketId];
@@ -291,4 +319,17 @@ socket.on("allUsers", (message) => {
         let pc = createReceiverPeerConnection(socketId, userName);
         createReceiverOffer(pc, socket, socketId, roomId);
     }
+});
+
+socket.on("roomInfo", (message) => {
+    roomLeader = message.roomLeader;
+    numOfUsers = message.numOfUsers;
+
+    document.getElementsByClassName('c_r')[0].innerHTML = numOfUsers + '명';
+    document.getElementsByClassName('c_y')[0].innerHTML = roomLeader;
+    document.getElementById('num_user_span').innerHTML = numOfUsers + '명';
+});
+
+socket.on("get_1_1_request", () => {
+    document.getElementsByClassName('chat_accept')[0].setAttribute('style', 'display:block;');
 });

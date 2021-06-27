@@ -47,11 +47,14 @@ app.post('/login', (request, response) => {
             return;
         }
         if(results[0].room_type === 1) {
-            response.render('meeting.ejs', {
-                roomId: requestRoomId,
-                userName: requestUserName
+            connection.query(`select count(*) as c from ${requestRoomId}`, (err, rows, fields) => {
+                console.log(rows);
+                response.render('meeting.ejs', {
+                    roomId: requestRoomId,
+                    userName: requestUserName,
+                });
+                return;
             });
-            return;
         }
         if(results[0].room_type === 2) {
             response.render('seminar.ejs', {
@@ -82,12 +85,12 @@ app.post('/make-meeting', (request, response) => {
 
     console.log(roomId);
 
-    connection.query("create table " + roomId + "(socket_id char(25) primary key);");
-    connection.query("insert into rooms(room_id, room_name, room_type) value('" + roomId + "', '" + roomName + "', '" + 1 + "');");
+    connection.query(`create table ${roomId}(socket_id char(25) primary key);`);
+    connection.query(`insert into rooms(room_id, room_name, room_type, room_leader) value('${roomId}', '${roomName}', '1', '${userName}');`);
     
     response.render('meeting.ejs', {
         roomId: roomId,
-        userName: userName
+        userName: userName,
     });
 });
 
@@ -110,6 +113,10 @@ app.get('/seminar', (request, response) => {
         roomId: requestRoomId,
         userName: requestUserName
     });
+});
+
+app.get('/exit', (request, response) => {
+    response.redirect('/');
 });
 
 //-----------------------------------------------------------------------
@@ -137,6 +144,7 @@ const pc_config = {
 let sendPCs = {};
 let receivePCs = {};
 let userStreams = {};
+let numOfUsers = {};
 
 let ontrackSwitch = false;
 
@@ -242,18 +250,49 @@ io.on('connection', function(socket) {
                 let socketId = rows[0].socket_id;
                 let userName = rows[0].user_name;
 
+                numOfUsers[roomId]--;
+
                 deleteUser(socketId, roomId);
                 closeReceiverPC(socketId);
                 closeSenderPCs(socketId);
 
                 socket.broadcast.to(roomId).emit("userExit", { 
                     id: socketId,
-                    userName: userName
+                    userName: userName,
+                    numOfUsers: numOfUsers[roomId],
+                    roomId: roomId
                 });
             });
         } catch (error) {
             console.error(error);
         }
+    });
+
+    socket.on('roomInfo', (message) => {
+        connection.query(`select room_leader from rooms where room_id = '${message.roomId}'`, (err, rows, fields) => {
+            if(err) console.error(err);
+            if(rows[0].room_leader === message.userName) {
+                socket.emit('roomInfo', {
+                    roomLeader: rows[0].room_leader,
+                    numOfUsers: 1
+                });
+                numOfUsers[message.roomId] = 1;
+                return;
+            }
+            socket.emit('roomInfo', {
+                roomLeader: rows[0].room_leader,
+                numOfUsers: ++numOfUsers[message.roomId]
+            });
+        });
+    });
+
+    socket.on('request_1_1', (message) => {
+        console.log(message.target);
+        connection.query(`select socket_id from users where user_name = '${message.target}'`, (err, rows, fields) => {
+            var target = rows[0].socket_id;
+
+            io.to(target).emit('get_1_1_request');
+        });
     });
 });
 

@@ -34,7 +34,7 @@
 				<div class="flo_right r_hcont">
 					<div class="d_ib first">
 						<p class="people">현재 참여인원</p>
-						<p class="people_nm"><span><img src="img/people_nm.png" alt="인원수"/></span>24명</p>
+						<p class="people_nm"><span><img src="img/people_nm.png" alt="인원수"/></span><span id='num_user_span'></span></p>
 					</div>
 					
 					<div class="d_ib second">
@@ -119,12 +119,25 @@
 							<li>현재 참여인원<span class="c_r">24명</span></li>
 						</ul>
 						<div class="cc_btn">
-							<a href="login.html"><span></span>나가기</a>
+							<a onclick="socket.emit('disconnect')" href="https://localhost/exit"><span></span>나가기</a>
 						</div>
 					</div>
 				</div>
 			</div>
 			<!--menu open : e-->
+
+			<div class="chat_accept" style="display: none;">
+				<div class="inner">
+					<div class="ca_box">						
+						<p><span class="c_y">나선생</span>님이</p>
+						<p>1 : 1 대화를 신청하셨습니다</p>						
+						<div class="ca_btn">
+							<a href="view_share.html" class="accept"><span></span>수락하기</a>
+							<a class="refusal"><span></span>거절하기</a>
+						</div>
+					</div>
+				</div>
+			</div>
     </body>
 	<script src="../js/meeting.js"></script>
 </html>
