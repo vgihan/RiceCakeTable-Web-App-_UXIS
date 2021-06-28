@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Web-RTC(3)</title>
+    </head>
+    <body>
+        <div>
+            <h1>Recording</h1>
+            <video id="localVideo" height="200" width="300" autoplay></video>
+            <video id="recordVideo" height="200" width="300" autoplay></video> 
+        </div>
+        <div>
+            <button id="record">Start Recording</button>  
+            <button id="play">Play Recording</button>
+            <!--<button id="download">Download Recording</button>-->
+            <button id="capture">Start Capture</button>
+            <!-- 화면고유유유유유유유 버튼 ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ-->
+            <button id="share">Share</button>
+        </div>
+        <div>
+            <canvas id="canvas" style='display:none' height="200" width="300"></canvas>
+            <a id="videoUrl" style='display:none'></a>
+            <a id="imageUrl" style='display:none'></a>
+        </div>
+        <div>
+            <h1>Capture images</h1>
+            <img id='image'></img>
+        </div>
+        <div class='sharePosition'>
+            <h1>Share</h1>
+        </div>
+        <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+        <script type="text/javascript" src="./record.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            $(document).ready(function(){
+
+                //socket
+                let socket = io();
+
+                var mediaRecorder; //MediaRecorder 인터페이스 담을 변수
+                var recordedBlobs; //timeslice마다 기록한 미디어 담는 리스트 변수
+                var repeatCapture //capture 반복하고 있는지 아닌지 나타내는 상태 변수
+                
+                //내 카메라 가져오기
+                mycamera();
+
+                //버튼 이벤트 리스너
+                $('#record').click(function(){
+                    if($('#record').text() === 'Start Recording') startRecording();
+                    else stopRecording();
+                });
+                $('#play').click(play);
+                $('#download').click(download);
+                $('#capture').click(function(){
+                    if($('#capture').text() === 'Start Capture') startCapture();
+                    else stopCapture();
+                });
+                $('#share').click(share);
+
+                function mycamera() {
+
+                    let socket = io.connect("")
+
+                    const constraints = {
+                    'video' : true,
+                    'audio' : true
+                    }
+
+                    navigator.mediaDevices.getUserMedia(constraints)
+                    .then(gotStream)
+                    .catch(error => {
+                        console.log('error local mediastream',error);
+                    });
+
+                    function gotStream(stream){ //local stream
+                        const videoEI = document.getElementById('localVideo');
+                        //window 객체 = 브라우저 전체를 담당 (웹사이트만 담당하는 document 객체도 포함하고 있다)
+                        window.stream = stream;
+                        videoEI.srcObject = stream;
+                    }
+                }
+
+                function startRecording() {
+                    recordedBlobs = [];
+                    //MediaRecorder = 미디어를 쉽게 기록하는 기능을 제공하는 인터페이스 (MediaStream Recording API에 포함)
+                    try {
+                        mediaRecorder = new MediaRecorder(window.stream,{mimeType: 'video/webm'});
+                    }catch(error) {
+                        alert('error Media Recorder'+error);
+                        return;
+                    }
+                    //이벤트 핸들러
+                    mediaRecorder.ondataavailable = (event) => {
+                        if(event.data && event.data.size>0) {
+                            recordedBlobs.push(event.data);
+                        }
+                    }
+                    //mediaRecorder.onstart() => (event) => {}
+                    //mediaRecorder.onstop() => (evnet) => {}
+
+                    mediaRecorder.start(); //기록 시작 (인자 = 밀리 초 단위)
+                    //버튼 비활성화
+                    $('#record').text('Stop Recording');
+                    $('#play').attr('disabled',true);
+                    $('#download').attr('disabled',true);
+                }
+
+                function stopRecording() {
+                    mediaRecorder.stop(); //기록 중지
+                    //버튼 활성화
+                    $('#record').text('Start Recording');
+                    $('#play').attr('disabled',false);
+                    $('#download').attr('disabled',false);
+                }
+
+                function play() {
+                    const videoEI = document.getElementById('recordVideo');
+                    videoEI.controls = true
+                    var blob = new Blob(recordedBlobs, {mimeType:'video/mp4'});
+                    videoEI.src = window.URL.createObjectURL(blob); //주어진 객체를 가리키는 url 생성
+                    videoEI.play();
+                }
+                
+                async function download() {
+                    const urlEI = document.getElementById('videoUrl');
+                    var blob = await new Blob(recordedBlobs, {mimeType:'video/mp4'});
+                    var videoUrl = await window.URL.createObjectURL(blob);
+                    urlEI.href = videoUrl;
+                    urlEI.download = 'record.mp4';
+                    await urlEI.click();
+                    await window.URL.revokeObjectURL(url);
+                }
+
+                var index = 0;
+                async function startCapture() {
+                    const videoEI = document.getElementById('localVideo');
+                    const canvasEI = document.getElementById('canvas');
+                    const imageEI = document.getElementById('image');
+                    const imagesEI = document.getElementById('images');
+                    const urlEI = document.getElementById('imageUrl');
+                    repeatCapture = await setInterval(function(){
+                        //canvas에 localvideo 그리기
+                        const context = canvasEI.getContext('2d');
+                        context.drawImage(videoEI,0,0,videoEI.width-10,videoEI.height);
+                        //로컬 다운로드
+                        var imageUrl =canvasEI.toDataURL('image/jpeg');
+                        imageEI.src=imageUrl;
+                        //urlEI.href=imageUrl;
+                        //urlEI.download='capture.jpeg';
+                        //urlEI.click();
+                        //서버 다운로드
+                        roomID = 123
+                        userID = 'lalala';
+                        socket.emit('save',{ url: imageUrl
+                                            ,user: userID
+                                            ,index: index
+                                            ,room: roomID});
+                        index = index+1;
+                    },7000);
+                    
+                    $('#capture').text('Stop Capture');
+                    index = 0; //index 초기화
+                }
+                async function stopCapture() {
+                    await clearInterval(repeatCapture);
+                    $('#capture').text('Start Capture');
+                }
+
+                //화면 공유유유유유유유ㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠㅠ
+                function share() {
+                    var video = document.createElement('video');
+                    video.id = 'display';
+                    video.width = '700';
+                    video.height = '500';
+                    video.autoplay = true;
+                    document.getElementsByClassName('sharePosition')[0].appendChild(video);
+                    navigator.mediaDevices.getDisplayMedia({
+                            audio:true,
+                            video:true
+                    }).then(function(stream){ //disaply stream
+                            const videoEI = document.getElementById('display');
+                            videoEI.srcObject = stream;
+                            // 공유중지했을때
+                            stream.getVideoTracks()[0].addEventListener('ended', () => {
+                                document.getElementsByClassName('sharePosition')[0].removeChild(video);
+                            });
+                    }).catch(error => {
+                            console.log('error display stream',error);
+                    });
+                }
+            });
+        </script>
+    </body>
+</html>
+
+<!--button의 disabled 속성 = 해당 버튼 비활성화 (사용자가 클릭할 수 없어) (boolean속성)-->
+<!--textContent 속성 = 지정된 노드와 모든 자손의 텍스트 내용 반환 및 설정-->
+
+<!--  
+ondataavailable = dataavailable 이벤트 핸들러
+timeslice (millisecond)만큼의 미디어가 기록될 때마다 (timeslice 딱히 없으면 전체 미디어 기록될 때마다) dataavailable 이벤트 발생
+dataavailable 이벤트는 BlobEvent 타입이다 (Blob과 관련, data 속성) 타입
+stop() 호출되면 = whole stream(media captured) is made available in one single Blob
+new Blob(array, option);
+createBlobURL = Blob 객체를 URL로 만들 수 있다
+revokeObjectURL = Blob URL에서 사용한 메모리는 저절로 해체되지 않기 때문에 이 함수로 해체해야 한다
+
+ blob
+ = 단순한 텍스트가 아니라 이미지, 사운드, 동영상 등 대용량 바이너리 데이터를 담는 객체
+ = 데이터의 크기, MIME 타입 알아내거나 더 작은 Blob으로 잘게 나누는 작업에 사용
+
+ canvas
+ = 그림을 그리기 위해 놓는 그림판, 도화지 같은느낌
+
+-->
