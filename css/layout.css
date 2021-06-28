@@ -20,8 +20,9 @@ body{font-family:"GmarketSans", "Noto Sans",sans-serif;  font-size:1.6rem; color
 .login_box .ptp_btn a{display: block;  width: 100%; border-radius: 5px; height: 55px; line-height: 55px; text-align: center; color: #fff; font-weight: 500; transition: background 0.2s;}
 .login_box .ptp_btn a:hover{background:#f76857;}
 .login_box .sel_btn{overflow: hidden;  margin: 0 auto; height: 55px; background:none;}
+.login_box .sel_btn input[type="submit"]{width: 160px; height: 55px; color:#fff; line-height: 55px; background: #ed6353; border-radius:5px; font-weight: 500; transition: background 0.2s;}
 .login_box .sel_btn a{width: 160px; height: 55px; color:#fff; line-height: 55px; background: #ed6353; border-radius:5px; font-weight: 500; transition: background 0.2s;}
-.login_box .sel_btn a.create{float:left;}
+.login_box .sel_btn input[type="submit"].create{float:left;}
 .login_box .sel_btn a.cancel{float:right; background:#8f8f8f;}
 .login_box .r_date{font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif; background:#f4ab0e; line-height: 60px; text-align: left; padding: 0 20px;}
 .login_box .r_date p{}

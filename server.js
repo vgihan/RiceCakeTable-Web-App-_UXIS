@@ -29,6 +29,19 @@ const server = https.createServer(options, app).listen(443, () => {
     console.log("Create HTTPS Server");
 });
 
+//-------------------------------------RUN TIME DATA-----------------------------------
+let roomList = {};
+let users = {};
+let rooms = {};
+
+let sendPCs = {};
+let receivePCs = {};
+let userStreams = {};
+let numOfUsers = {};
+
+let ontrackSwitch = false;
+//-------------------------------------------------------------------------------------
+
 app.get('/', (request, response) => {
     response.render('login.ejs');
 });
@@ -37,33 +50,24 @@ app.post('/login', (request, response) => {
     var requestRoomId = request.body.input_rm;
     var requestUserName = request.body.input_nm;
     
-    connection.query(`select room_type from rooms where room_id = '${requestRoomId}';`, (err, results, fields) => {
-        if(err) {
-            console.error(err);
-            return;
-        }
-        if(results.length === 0) {
-            response.redirect('/');
-            return;
-        }
-        if(results[0].room_type === 1) {
-            connection.query(`select count(*) as c from ${requestRoomId}`, (err, rows, fields) => {
-                console.log(rows);
-                response.render('meeting.ejs', {
-                    roomId: requestRoomId,
-                    userName: requestUserName,
-                });
-                return;
-            });
-        }
-        if(results[0].room_type === 2) {
-            response.render('seminar.ejs', {
-                roomId: requestRoomId,
-                userName: requestUserName
-            });
-            return;
-        }
-    });
+    if(!roomList[requestRoomId]) {
+        response.redirect('/');
+        return;
+    }
+    if(rooms[requestRoomId]['room_type'] === 1) {
+        response.render('meeting.ejs', {
+            roomId: requestRoomId,
+            userName: requestUserName,
+        });
+        return;
+    }
+    if(rooms[requestRoomId]['room_type'] === 2) {
+        response.render('seminar.ejs', {
+            roomId: requestRoomId,
+            userName: requestUserName
+        });
+        return;
+    }
 });
 
 app.get('/make-room', (request, response) => {
@@ -84,10 +88,15 @@ app.post('/make-meeting', (request, response) => {
     let userName = request.body.input_nm;
 
     console.log(roomId);
+    console.log(rooms);
 
-    connection.query(`create table ${roomId}(socket_id char(25) primary key);`);
-    connection.query(`insert into rooms(room_id, room_name, room_type, room_leader) value('${roomId}', '${roomName}', '1', '${userName}');`);
-    
+    roomList[roomId] = {};
+    rooms[roomId] = {
+        room_name: roomName,
+        room_type: 1,
+        room_leader: userName
+    };
+
     response.render('meeting.ejs', {
         roomId: roomId,
         userName: userName,
@@ -141,13 +150,6 @@ const pc_config = {
     ],
 }
 
-let sendPCs = {};
-let receivePCs = {};
-let userStreams = {};
-let numOfUsers = {};
-
-let ontrackSwitch = false;
-
 io.on('connection', function(socket) {
     console.log("connection");
     
@@ -159,9 +161,12 @@ io.on('connection', function(socket) {
             var roomId = message.roomId;
             var userName = message.userName;
 
-            connection.query(`insert into ${roomId}(socket_id) values('${socketId}');`);
-            connection.query(`insert into users(socket_id, user_name, room_id) values('${socketId}', '${userName}', '${roomId}');`);
-            
+            roomList[roomId][socketId] = 1;
+            users[socketId] = {
+                user_name: userName,
+                room_id: roomId
+            };
+
             let pc = createReceiverPeerConnection(socketId, socket, roomId, userName);
             await pc.setRemoteDescription(revSdp);
             let sdp = await pc.createAnswer({
@@ -222,16 +227,18 @@ io.on('connection', function(socket) {
     //방에 처음 접속한 user에게 접속하고 있었던 user들의 정보를 제공하는 역할
     socket.on("joinRoom", async (message) => {
         try {
-            connection.query(`select * from users,${message.roomId} where users.socket_id = ${message.roomId}.socket_id;`, (err, rows, fields) => {
-                if(err) {
-                    console.error(err);
-                    return;
-                }
-                io.to(message.senderSocketId).emit("allUsers", { 
-                    users: rows,
+            let rows = [];
+            for(var key in roomList[message.roomId]) {
+                rows.push({
+                    socket_id: key,
+                    user_name: users[key]['user_name'],
+                    room_id: users[key]['room_id']
                 });
-                console.log("joinRoom"); 
+            }
+            io.to(message.senderSocketId).emit("allUsers", { 
+                users: rows,
             });
+            console.log("joinRoom");
         } catch (error) {
             console.error(error);
         }
@@ -240,28 +247,21 @@ io.on('connection', function(socket) {
     //통신 종료
     socket.on("disconnect", () => {
         try {
-            connection.query(`select * from users where socket_id = '${socket.id}'`, (err, rows, fields) => {
-                if(err) {
-                    console.error(err);
-                    return;
-                }
+            let roomId = users[socket.id]['room_id'];
+            let socketId = socket.id;
+            let userName = users[socket.id]['user_name'];
 
-                let roomId = rows[0].room_id;
-                let socketId = rows[0].socket_id;
-                let userName = rows[0].user_name;
+            numOfUsers[roomId]--;
 
-                numOfUsers[roomId]--;
+            deleteUser(socketId, roomId);
+            closeReceiverPC(socketId);
+            closeSenderPCs(socketId);
 
-                deleteUser(socketId, roomId);
-                closeReceiverPC(socketId);
-                closeSenderPCs(socketId);
-
-                socket.broadcast.to(roomId).emit("userExit", { 
-                    id: socketId,
-                    userName: userName,
-                    numOfUsers: numOfUsers[roomId],
-                    roomId: roomId
-                });
+            socket.broadcast.to(roomId).emit("userExit", { 
+                id: socketId,
+                userName: userName,
+                numOfUsers: numOfUsers[roomId],
+                roomId: roomId
             });
         } catch (error) {
             console.error(error);
@@ -269,30 +269,29 @@ io.on('connection', function(socket) {
     });
 
     socket.on('roomInfo', (message) => {
-        connection.query(`select room_leader from rooms where room_id = '${message.roomId}'`, (err, rows, fields) => {
-            if(err) console.error(err);
-            if(rows[0].room_leader === message.userName) {
-                socket.emit('roomInfo', {
-                    roomLeader: rows[0].room_leader,
-                    numOfUsers: 1
-                });
-                numOfUsers[message.roomId] = 1;
-                return;
-            }
+        let roomLeader = rooms[message.roomId]['room_leader'];
+
+        if(roomLeader === message.userName) {
             socket.emit('roomInfo', {
-                roomLeader: rows[0].room_leader,
-                numOfUsers: ++numOfUsers[message.roomId]
+                roomLeader: roomLeader,
+                numOfUsers: 1
             });
+            numOfUsers[message.roomId] = 1;
+            return;
+        }
+
+        socket.emit('roomInfo', {
+            roomLeader: roomLeader,
+            numOfUsers: ++numOfUsers[message.roomId]
         });
     });
 
     socket.on('request_1_1', (message) => {
-        console.log(message.target);
-        connection.query(`select socket_id from users where user_name = '${message.target}'`, (err, rows, fields) => {
-            var target = rows[0].socket_id;
-
-            io.to(target).emit('get_1_1_request');
-        });
+        let target;
+        for(var key in users) {
+            if(users[key]['user_name'] === message.target) target = key;
+        }
+        io.to(target).emit('get_1_1_request');
     });
 });
 
@@ -362,19 +361,14 @@ function createReceiverPeerConnection(socketId, socket, roomId, userName) {
 //DB에서 나간 유저의 정보 삭제
 //마지막 유저가 나가면 방이 삭제됨
 function deleteUser(socketId, roomId) {
-    connection.query("delete from " + roomId + " where socket_id = '" + socketId + "';");
-    connection.query("delete from users where socket_id = '" + socketId + "';");
-    connection.query("select * from " + roomId + ";", (err, results, fields) => {
-        if(err) {
-            console.error(err);
-            return;
-        }
-        if(results.length === 0) {
-            connection.query("drop table " + roomId + ";");
-            connection.query(`delete from rooms where room_id = '${roomId}'`);
-            return;
-        }
-    });
+    delete roomList[roomId][socketId];
+    delete users[socketId];
+
+    if(Object.keys(roomList[roomId]).length === 0) {
+        delete roomList[roomId];
+        delete rooms[roomId];
+        return;
+    }
 }
 
 //받는 peerConnection 종료
