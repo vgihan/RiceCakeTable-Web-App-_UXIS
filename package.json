@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "mysql": "^2.18.1",
+    "node-pre-gyp": "^0.17.0",
+    "node.js": "^0.0.1-security",
+    "socket.io": "^4.1.2",
+    "socket.io-client": "^4.1.2",
+    "wrtc": "^0.4.7"
+  }
+}

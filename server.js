@@ -6,15 +6,16 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const wrtc = require('wrtc');
 const fs = require('fs');
-
+/*
 const connection = mysql.createConnection({
-    host    : 'localhost',
-    user    : 'root',
-    password: '254425',
-    database: 'better_teaching'
+    host     : '104.198.45.164',
+    user     : 'root',
+    password : '1111',
+    database : 'webrtc',
 });
 
 connection.connect();
+*/
 
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname));
@@ -33,25 +34,14 @@ const server = https.createServer(options, app).listen(443, () => {
 let roomList = {};
 let users = {};
 let rooms = {};
+let roomToTime={};
 
-let sendPCs = {
-    'seminar':{},
-    'meeting':{},
-    'share':{}
-};
-let receivePCs = {
-    'seminar':{},
-    'meeting':{},
-    'share':{}
-};
-
+let sendPCs = {};
+let receivePCs = {};
 let userStreams = {};
-let shareStreams = {};
-let seminarStreams = {};
 let numOfUsers = {};
 
 let ontrackSwitch = false;
-let candidateSwitch;
 //-------------------------------------------------------------------------------------
 
 app.get('/', (request, response) => {
@@ -66,14 +56,14 @@ app.post('/login', (request, response) => {
         response.redirect('/');
         return;
     }
-    if(rooms[requestRoomId]['room_type'] === 'meeting') {
+    if(rooms[requestRoomId]['room_type'] === 1) {
         response.render('meeting.ejs', {
             roomId: requestRoomId,
             userName: requestUserName,
         });
         return;
     }
-    if(rooms[requestRoomId]['room_type'] === 'seminar') {
+    if(rooms[requestRoomId]['room_type'] === 2) {
         response.render('seminar.ejs', {
             roomId: requestRoomId,
             userName: requestUserName
@@ -105,7 +95,7 @@ app.post('/make-meeting', (request, response) => {
     roomList[roomId] = {};
     rooms[roomId] = {
         room_name: roomName,
-        room_type: 'meeting',
+        room_type: 1,
         room_leader: userName
     };
 
@@ -118,8 +108,7 @@ app.post('/make-meeting', (request, response) => {
 app.post('/make-seminar', (request, response) => {
     let roomId = request.body.input_rm;
     let userName = request.body.input_nm;
-
-    connection.query("create table " + roomId + "(socket_id char(25) primary key);");
+    
 });
 
 app.get('/meeting', (request, response) => {
@@ -168,7 +157,7 @@ io.on('connection', function(socket) {
     //클라이언트 -> 서버 peerConnection offer
     socket.on("senderOffer", async (message) => {
         try {
-            var offer = message.offer;
+            var revSdp = message.sdp;
             var socketId = message.senderSocketId;
             var roomId = message.roomId;
             var userName = message.userName;
@@ -179,16 +168,16 @@ io.on('connection', function(socket) {
                 room_id: roomId
             };
 
-            candidateSwitch = false;
+            let pc = createReceiverPeerConnection(socketId, socket, roomId, userName);
+            await pc.setRemoteDescription(revSdp);
+            let sdp = await pc.createAnswer({
+                offerToReceiveAudio: true,
+                offerToReceiveVideo: true,
+            });
+            await pc.setLocalDescription(sdp);
 
-            let pc = createReceiverPeerConnection(socket, roomId, userName, meetingOntrackHandler, message.purpose);
-            let answer = await createReceiverAnswer(offer, pc);
-
-            receivePCs[message.purpose][socketId] = pc;
-
-            await io.to(socketId).emit("getSenderAnswer", { answer });
-
-            candidateSwitch = true;
+            socket.join(roomId);
+            io.to(message.senderSocketId).emit("getSenderAnswer", { sdp });
         } catch (error) {
             console.error(error);
         }
@@ -197,35 +186,20 @@ io.on('connection', function(socket) {
     //클라이언트 <- 서버 peerConnection offer
     socket.on("receiverOffer", async (message) => {
         try {
-            candidateSwitch = false;
-
-            let offer = message.offer;
-            let purpose = message.purpose;
-            let senderSocketId = message.senderSocketId;
-            let receiverSocketId = message.receiverSocketId;
-
             let pc = createSenderPeerConnection(
-                receiverSocketId,
-                senderSocketId,
-                userStreams[senderSocketId],
-                purpose,
+                message.receiverSocketId,
+                message.senderSocketId,
             );
-            let answer = await createSenderAnswer(offer, pc);
-
-            if(sendPCs[purpose][senderSocketId]) {
-                sendPCs[purpose][senderSocketId][receiverSocketId] = pc;
-            } else {
-                sendPCs[purpose][senderSocketId] = {};
-                sendPCs[purpose][senderSocketId][receiverSocketId] = pc;
-            }
-
-            await io.to(receiverSocketId).emit("getReceiverAnswer", {
-                id: senderSocketId,
-                purpose: purpose,
-                answer,
+            await pc.setRemoteDescription(message.sdp);
+            let sdp = await pc.createAnswer({
+                offerToReceiveAudio: false,
+                offerToReceiveVideo: false,
             });
-
-            candidateSwitch = true;
+            await pc.setLocalDescription(sdp);
+            io.to(message.receiverSocketId).emit("getReceiverAnswer", {
+                id: message.senderSocketId,
+                sdp,
+            });
         } catch (error) {
             console.error(error);
         }
@@ -234,7 +208,7 @@ io.on('connection', function(socket) {
     //클라이언트 -> 서버 candidate
     socket.on("senderCandidate", (message) => {
         try {
-            let pc = receivePCs[message.purpose][message.senderSocketId];
+            let pc = receivePCs[message.senderSocketId];
             pc.addIceCandidate(new wrtc.RTCIceCandidate(message.candidate));
         } catch (error) {
             console.error(error);
@@ -244,10 +218,10 @@ io.on('connection', function(socket) {
     //클라이언트 <- 서버 candidate
     socket.on("receiverCandidate", async (message) => {
         try {
-            let senderPC = sendPCs[message.purpose][message.senderSocketId][message.receiverSocketId];
+            let senderPC = sendPCs[message.senderSocketId][message.receiverSocketId];
             await senderPC.addIceCandidate(new wrtc.RTCIceCandidate(message.candidate));
         } catch (error) {
-            console.error(error);
+            console.log("여긴가?" + error);
         }
     });
 
@@ -259,14 +233,12 @@ io.on('connection', function(socket) {
                 rows.push({
                     socket_id: key,
                     user_name: users[key]['user_name'],
+                    room_id: users[key]['room_id']
                 });
             }
-            if(!rows.length === 0) {
-                io.to(message.senderSocketId).emit("allUsers", { 
-                    users: rows,
-                });
-            }
-            socket.join(message.roomId);
+            io.to(message.senderSocketId).emit("allUsers", { 
+                users: rows,
+            });
             console.log("joinRoom");
         } catch (error) {
             console.error(error);
@@ -274,24 +246,27 @@ io.on('connection', function(socket) {
     });
 
     //통신 종료
-    socket.on("disconnect", (message) => {
+    socket.on("disconnect", () => {
         try {
             let roomId = users[socket.id]['room_id'];
             let socketId = socket.id;
             let userName = users[socket.id]['user_name'];
+            
+            if(users[roomId]===undefined){
+                delete roomToTime[roomId];
+            }
 
             numOfUsers[roomId]--;
 
             deleteUser(socketId, roomId);
-            closeReceiverPC(socketId, message.purpose);
-            closeSenderPCs(socketId, message.purpose);
+            closeReceiverPC(socketId);
+            closeSenderPCs(socketId);
 
             socket.broadcast.to(roomId).emit("userExit", { 
                 id: socketId,
                 userName: userName,
                 numOfUsers: numOfUsers[roomId],
-                roomId: roomId,
-                purpose: message.purpose,
+                roomId: roomId
             });
         } catch (error) {
             console.error(error);
@@ -312,12 +287,10 @@ io.on('connection', function(socket) {
 
         socket.emit('roomInfo', {
             roomLeader: roomLeader,
-            numOfUsers: ++numOfUsers[message.roomId],
-            roomType: rooms[message.roomId]['room_type'],
+            numOfUsers: ++numOfUsers[message.roomId]
         });
     });
 
-    //1:1 요청
     socket.on('request_1_1', (message) => {
         let target;
         for(var key in users) {
@@ -326,30 +299,51 @@ io.on('connection', function(socket) {
         io.to(target).emit('get_1_1_request');
     });
 
-    //화면 공유
-    socket.on('display_share', (message) => {
+    socket.on('set_roomTime', function(data) {
+        console.log("roomToTime:",roomToTime[data.roomId]);
+        if(roomToTime[data.roomId]===undefined)
+            roomToTime[data.roomId]=data.time;
+        else
+            socket.emit('get_roomTime',{time:roomToTime[data.roomId]});
+    })  
 
+    socket.on('message', (data) => {
+        console.log("chat_"+data.userName,":",data.message)
+        /* 보낸 사람을 제외한 나머지 유저에게 메시지 전송 */
+        socket.broadcast.to(data.roomId).emit('update', data);
+        /*
+        //mysql에 대화 정보 저장
+        var sql = "INSERT INTO chat_db (userName, roomId, roomTime, msg) VALUES ('"+ data.userName +"','"+ data.roomId+"','"+data.roomTime+"','"+data.message+"')";
+        connection.query(sql, function (err, result) {
+        if (err) throw err;
+        console.log("1 record inserted");
+        });
+        */
     });
 });
 
-function createSenderPeerConnection(receiverSocketId, senderSocketId, stream, purpose) {
+function createSenderPeerConnection(receiverSocketId, senderSocketId) {
     let pc = new wrtc.RTCPeerConnection(pc_config);
 
+    if(sendPCs[senderSocketId]) {
+        sendPCs[senderSocketId][receiverSocketId] = pc;
+    } else {
+        sendPCs[senderSocketId] = {};
+        sendPCs[senderSocketId][receiverSocketId] = pc;
+    }
+
     pc.onicecandidate = (e) => {
-        if(!candidateSwitch) return;
-        if(!e.candidate) {
-            io.to(receiverSocketId).emit("getReceiverCandidate", {
-                id: senderSocketId,
-                candidate: e.candidate,
-                purpose: purpose,
-            });
-        }
+        io.to(receiverSocketId).emit("getReceiverCandidate", {
+            id: senderSocketId,
+            candidate: e.candidate,
+        });
     }
 
     pc.oniceconnectionstatechange = (e) => {
         //console.log(e);
     }
 
+    const stream = userStreams[senderSocketId];
     stream.getTracks().forEach((track => {
         pc.addTrack(track, stream);
     }));
@@ -357,15 +351,14 @@ function createSenderPeerConnection(receiverSocketId, senderSocketId, stream, pu
     return pc;
 }
 
-function createReceiverPeerConnection(socket, roomId, userName, ontrackHandler, purpose) {
+function createReceiverPeerConnection(socketId, socket, roomId, userName) {
     let pc = new wrtc.RTCPeerConnection(pc_config);
+
+    receivePCs[socketId] = pc;
     
     pc.onicecandidate = (e) => {
-        if(!candidateSwitch) return;
-        if(!e.candidate) return;
-        io.to(socket.id).emit("getSenderCandidate", {
+        io.to(socketId).emit("getSenderCandidate", {
             candidate: e.candidate,
-            purpose: purpose,
         });
     }
 
@@ -374,57 +367,30 @@ function createReceiverPeerConnection(socket, roomId, userName, ontrackHandler, 
     }
 
     pc.ontrack = (e) => {
-        ontrackHandler(e.streams[0], socket, roomId, userName);
+        if(ontrackSwitch) {
+            ontrackSwitch = false;
+            return;
+        }
+        userStreams[socketId] = e.streams[0];
+
+        socket.broadcast.to(roomId).emit("userEnter", { 
+            socketId: socketId,
+            roomId: roomId,
+            userName: userName
+        });
+        //이전 채팅 보내기 
+        /*
+        connection.query("SELECT * FROM chat_db where roomId = '"+roomId+"' and roomTime ="+roomToTime[roomId], function (err, result, fields) {
+            if (err) throw err;
+            //console.log(result);
+            console.log('request_chat');
+            socket.emit('get_chat',result)
+        });	
+        */
+        ontrackSwitch = true;
     }
 
     return pc;
-}
-
-async function createSenderAnswer(offer, pc) {
-    try {
-        await pc.setRemoteDescription(offer);
-        let answer = await pc.createAnswer({
-            offerToReceiveAudio: false,
-            offerToReceiveVideo: false,
-        });
-        await pc.setLocalDescription(answer);
-
-        return answer;
-    } catch(err) {
-        console.error(err);
-    }
-}
-
-async function createReceiverAnswer(offer, pc) {
-    try {
-        await pc.setRemoteDescription(offer);
-        let answer = await pc.createAnswer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: true,
-        });
-        await pc.setLocalDescription(answer);
-
-        return answer;
-    } catch(err) {
-        console.error(err);
-    }
-}
-
-function meetingOntrackHandler(stream, socket, roomId, userName) {
-    if(ontrackSwitch) {
-        ontrackSwitch = false;
-        return;
-    }
-    userStreams[socket.id] = stream;
-
-    socket.broadcast.to(roomId).emit("userEnter", { 
-        socketId: socket.id,
-        roomId: roomId,
-        userName: userName
-    });
-    
-    ontrackSwitch = true;
-    return;
 }
 
 //DB에서 나간 유저의 정보 삭제
@@ -441,21 +407,21 @@ function deleteUser(socketId, roomId) {
 }
 
 //받는 peerConnection 종료
-function closeReceiverPC(socketId, purpose) {
-    if (!receivePCs[purpose][socketId]) return;
+function closeReceiverPC(socketId) {
+    if (!receivePCs[socketId]) return;
 
-    receivePCs[purpose][socketId].close();
-    delete receivePCs[purpose][socketId];
+    receivePCs[socketId].close();
+    delete receivePCs[socketId];
 }
 
 //보내는 peerConnection 종료
-function closeSenderPCs(socketId, purpose) {
-    if(!sendPCs[purpose][socketId]) return;
+function closeSenderPCs(socketId) {
+    if(!sendPCs[socketId]) return;
 
-    for(var key in sendPCs[purpose][socketId]) {
-        sendPCs[purpose][socketId][key].close();
-        delete sendPCs[purpose][socketId][key];
+    for(var key in sendPCs[socketId]) {
+        sendPCs[socketId][key].close();
+        delete sendPCs[socketId][key];
     }
 
-    delete sendPCs[purpose][socketId];
+    delete sendPCs[socketId];
 }
