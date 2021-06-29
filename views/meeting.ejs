@@ -1,3 +1,4 @@
+  
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -24,6 +25,8 @@
     <body onload="noBack();" onpageshow="if(event.persisted) noBack();" onunload="">
 		<p id='room_id' style="display: none;"><%= roomId %></p>
 		<p id='user_name' style="display: none;"><%= userName %></p>
+		<p id='room_type' style="display: none;"><%= roomType %></p>
+
         <div class="wrap view">
 			<!--header : s -->
 			<div class="header">
@@ -51,7 +54,8 @@
 			<!-- chatbox : s -->
 			<div class="list chatbox">
 				<div class="top mCustomScrollbar">
-					<ul>
+					<ul id="chat_inners">
+						<!--
 						<li>
 							<h1>참여자 1</h1>
 							<p>선생님~~ 방금 말씀하시거나 나중에 혹시 재방도 가능하실까요?? 오늘 수업 너무 좋은거 같아서 다시 한번 듣고 싶어서 그래요~~</p>
@@ -76,12 +80,13 @@
 							<h1>참여자 2</h1>
 							<p>고마워요~~하지만 오늘 중요한 수업인 만큼 집중해서 잘 들으시고, 재방은 어렵습니다.</p>
 						</li>
+						-->
 					</ul>
 				</div>
 				<div class="bottom">
-					<textarea placeholder="메세지를 입력하세요"></textarea>
+					<textarea id ="msg_box" onkeyup="enterkey()" placeholder="메세지를 입력하세요"></textarea>
 					<div class="btn_file">
-						<a href="" class="btn">전송</a>
+						<a class="btn" input type="button" onclick="send_msg()">전송</a>
 						<a href="" class="file"><img src="img/icon_file.png"/></a>
 					</div>
 				</div>
@@ -124,8 +129,8 @@
 						</div>
 						<h1>함께하는 방과후 English Class1</h1>
 						<ul>
-							<li>개설자<span class="c_y">나선생</span></li>
-							<li>현재 참여인원<span class="c_r">24명</span></li>
+							<li>개설자<span class="c_y"></span></li>
+							<li>현재 참여인원<span class="c_r"></span></li>
 						</ul>
 						<div class="cc_btn">
 							<a onclick="socket.emit('disconnect')" href="https://localhost/exit"><span></span>나가기</a>
@@ -138,7 +143,7 @@
 			<div class="chat_accept" style="display: none;">
 				<div class="inner">
 					<div class="ca_box">						
-						<p><span class="c_y">나선생</span>님이</p>
+						<p><span class="c_y"></span>님이</p>
 						<p>1 : 1 대화를 신청하셨습니다</p>						
 						<div class="ca_btn">
 							<a href="view_share.html" class="accept"><span></span>수락하기</a>

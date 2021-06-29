@@ -21,6 +21,9 @@
         <script src="../js/layout.js"></script>
     </head>
     <body>
+		<p id='room_id' style="display: none;"><%= roomId %></p>
+		<p id='user_name' style="display: none;"><%= userName %></p>
+		<p id='room_type' style="display: none;"><%= roomType %></p>
         <div class="wrap view01">
 			<!--header : s -->
 			<div class="header">
@@ -54,11 +57,11 @@
 						</div>
 						<h1>함께하는 방과후 English Class1</h1>
 						<ul>
-							<li>개설자<span class="c_y">나선생</span></li>
-							<li>현재 참여인원<span class="c_r">24명</span></li>
+							<li>개설자<span class="c_y"></span></li>
+							<li>현재 참여인원<span class="c_r"></span></li>
 						</ul>
 						<div class="cc_btn">
-							<a href="login.html"><span></span>나가기</a>
+							<a onclick="socket.emit('disconnect')" href="https://localhost/exit"><span></span>나가기</a>
 						</div>
 					</div>
 				</div>
@@ -70,7 +73,7 @@
 				
 				<div class="view_all">
 					<div>
-						<img src="img/sample_view.jpg" alt="풀화면"/>
+						<!-- presenter video -->>
 					</div>
 				</div>
 				
@@ -78,261 +81,7 @@
 				<div class="list_slide">
 					<div class="list_slide_box">
 						<ul>
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-						</ul>
-
-						<ul>
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1<br/>이름두줄</div>
-									</div>
-								</div>
-							</li>								
-							<li>
-								<div class="v_view">
-									<div class="info_ctxt">
-										<div class="nicknm">참여자1</div>
-									</div>
-								</div>
-							</li>			
+							<!-- 참여자 박스 -->			
 						</ul>						
 					</div>
 
@@ -351,7 +100,6 @@
 				<p>Copyright(c) By UXIS all rights reserved</p>
 			</div>
 
-			
 		</div>
     </body>
 </html>
