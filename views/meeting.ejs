@@ -34,7 +34,7 @@
 				<div class="flo_right r_hcont">
 					<div class="d_ib first">
 						<p class="people">현재 참여인원</p>
-						<p class="people_nm"><span><img src="img/people_nm.png" alt="인원수"/></span>24명</p>
+						<p class="people_nm"><span><img src="img/people_nm.png" alt="인원수"/></span><span id='num_user_span'></span></p>
 					</div>
 					
 					<div class="d_ib second">
@@ -51,7 +51,8 @@
 			<!-- chatbox : s -->
 			<div class="list chatbox">
 				<div class="top mCustomScrollbar">
-					<ul>
+					<ul id="chat_inners">
+						<!--
 						<li>
 							<h1>참여자 1</h1>
 							<p>선생님~~ 방금 말씀하시거나 나중에 혹시 재방도 가능하실까요?? 오늘 수업 너무 좋은거 같아서 다시 한번 듣고 싶어서 그래요~~</p>
@@ -76,12 +77,13 @@
 							<h1>참여자 2</h1>
 							<p>고마워요~~하지만 오늘 중요한 수업인 만큼 집중해서 잘 들으시고, 재방은 어렵습니다.</p>
 						</li>
+						-->
 					</ul>
 				</div>
 				<div class="bottom">
-					<textarea placeholder="메세지를 입력하세요"></textarea>
+					<textarea id ="msg_box" onkeyup="enterkey()" placeholder="메세지를 입력하세요"></textarea>
 					<div class="btn_file">
-						<a href="" class="btn">전송</a>
+						<a class="btn" input type="button" onclick="send_msg()">전송</a>
 						<a href="" class="file"><img src="img/icon_file.png"/></a>
 					</div>
 				</div>
@@ -89,6 +91,15 @@
 			<!-- chatbox : e -->
 
 			<div class="cont">
+				<div class="view_all" style="display: none;">
+					<!-- share video -->
+				</div>
+				<div class="self_view" style="display: none;">
+					<!-- self video -->
+				</div>
+				<div class="share_end" style="display: none;">
+					<!-- end button -->
+				</div>
 				<div class="inner">
 					<div class="slide_wrap">
 						<div class="slide_box ty01">
@@ -116,15 +127,28 @@
 						<h1>함께하는 방과후 English Class1</h1>
 						<ul>
 							<li>개설자<span class="c_y">나선생</span></li>
-							<li>현재 참여인원<span class="c_r"></span></li>
+							<li>현재 참여인원<span class="c_r">24명</span></li>
 						</ul>
 						<div class="cc_btn">
-							<a href="login.html"><span></span>나가기</a>
+							<a onclick="socket.emit('disconnect')" href="https://localhost/exit"><span></span>나가기</a>
 						</div>
 					</div>
 				</div>
 			</div>
 			<!--menu open : e-->
+
+			<div class="chat_accept" style="display: none;">
+				<div class="inner">
+					<div class="ca_box">						
+						<p><span class="c_y">나선생</span>님이</p>
+						<p>1 : 1 대화를 신청하셨습니다</p>						
+						<div class="ca_btn">
+							<a href="view_share.html" class="accept"><span></span>수락하기</a>
+							<a class="refusal"><span></span>거절하기</a>
+						</div>
+					</div>
+				</div>
+			</div>
     </body>
 	<script src="../js/meeting.js"></script>
 </html>
