@@ -228,7 +228,8 @@ socket.on("room_info", (message) => {
     roomType = message.roomType;
     
     document.getElementsByClassName('c_r')[0].innerHTML = numOfUsers + '명';
-    document.getElementsByClassName('c_y')[0].innerHTML = roomLeader;
+    document.getElementsByClassName('c_y')[0].innerHTML = message.leaderName;
+    document.getElementsByClassName('c_r')[1].innerHTML = roomId;
     document.getElementById('num_user_span').innerHTML = numOfUsers + '명';
 
     startFunction(message.userName, roomId, roomLeader);

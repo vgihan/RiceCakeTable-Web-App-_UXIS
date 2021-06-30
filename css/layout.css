@@ -15,15 +15,19 @@ body{font-family:"GmarketSans", "Noto Sans",sans-serif;  font-size:1.6rem; color
 /* 로그인 + 유형선택후 방만들기*/
 .login_box{padding: 55px 0 10px 0;  width: 100%;}
 .login_box .lbox{width: 330px; height: 60px; margin: 0px auto 10px; background: #fff; border-radius: 5px;}
-.login_box .lbox input{width: 100%; height: 60px; padding: 20px; box-sizing: border-box; border: 0; border-radius: 5px; font-size: 1.6rem;}
+.login_box .lbox input[type="submit"]{width: 330px; height: 60px; margin: 0px auto 10px; background: #fff; border-radius: 5px;}
+.login_box .lbox input[type="text"]{width: 100%; height: 60px; padding: 20px; box-sizing: border-box; border: 0; border-radius: 5px; font-size: 1.6rem;}
 .login_box .ptp_btn{background:#ed6353; height: 55px; margin: 0 auto; }
-.login_box .ptp_btn a{display: block;  width: 100%; border-radius: 5px; height: 55px; line-height: 55px; text-align: center; color: #fff; font-weight: 500; transition: background 0.2s;}
-.login_box .ptp_btn a:hover{background:#f76857;}
+.login_box .ptp_btn input[type="submit"]{background:#ed6353; height: 55px; margin: 0 auto; }
+.login_box .ptp_btn input[type="submit"]{display: block;  width: 100%; border-radius: 5px; height: 55px; line-height: 55px; text-align: center; color: #fff; font-weight: 500; transition: background 0.2s;}
+.login_box .ptp_btn input[type="submit"]:hover{background:#f76857;}
 .login_box .sel_btn{overflow: hidden;  margin: 0 auto; height: 55px; background:none;}
-.login_box .sel_btn input[type="submit"]{width: 160px; height: 55px; color:#fff; line-height: 55px; background: #ed6353; border-radius:5px; font-weight: 500; transition: background 0.2s;}
 .login_box .sel_btn a{width: 160px; height: 55px; color:#fff; line-height: 55px; background: #ed6353; border-radius:5px; font-weight: 500; transition: background 0.2s;}
-.login_box .sel_btn input[type="submit"].create{float:left;}
+.login_box .sel_btn a.create{float:left;}
 .login_box .sel_btn a.cancel{float:right; background:#8f8f8f;}
+.login_box .sel_btn input[type="submit"]{width: 160px; height: 55px; color:#fff; line-height: 55px; background: #ed6353; border-radius:5px; font-weight: 500; transition: background 0.2s;}
+.login_box .sel_btn input[type="submit"].create{float:left;}
+.login_box .sel_btn input[type="submit"].cancel{float:right; background:#8f8f8f;}
 .login_box .r_date{font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif; background:#f4ab0e; line-height: 60px; text-align: left; padding: 0 20px;}
 .login_box .r_date p{}
 .login_box .r_date p span{font-weight: 600;}
@@ -156,12 +160,12 @@ body{font-family:"GmarketSans", "Noto Sans",sans-serif;  font-size:1.6rem; color
 .chatbox .bottom .btn_file .file{display: block;  text-align: center;  padding: 10px 0 0 0;}
 .self_view{width: 250px; height: 210px;  border-radius: 5px; overflow:hidden;}
 .self_view > div{position:relative;}
-.self_view img{width:100%; }
+.self_view #self_video{width:100%; }
 .self_view .info_ctxt{position:absolute; bottom:5%; right:4%; color: #fff;  font-weight: 600;  font-size: 1.3rem; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;}
 .self_view .info_ctxt .nicknm{width: 100%; min-width: 84px; height: 36px; line-height: 36px; background-color: rgba(51,51,51,0.5); background-image: url(../img/icon_nicknm.png);  background-repeat: no-repeat; background-position: 12px; padding: 0 15px 0 30px; border-radius: 5px;}
 .cont .view_all{width: 100%; max-height: calc(100vh - 70px); height: 100vh; overflow: hidden; position: relative;}
 .cont .view_all div{position: absolute; top: 0; left: 0; width: 100%; height: 100%;}
-.cont .view_all div video{width:100%;}
+.cont .view_all div img{width:100%;}
 /* .cont .view_all img{width: 100vw; height: 56.25vw; min-height: calc(100vh + 340px); min-width: 177.77vh; position: absolute; top: 50%;  left: 50%; transform: translate(-50%, -50%);} */
 
 /* 1:1대화 수락 */

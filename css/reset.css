@@ -78,13 +78,17 @@ summary,
 time,
 mark,
 audio,
-video {
+video,
+input[type="submit"] {
     font-size: 100%;
     margin: 0;
     padding: 0;
     border: 0;
     vertical-align: baseline;
     line-height: 1;
+}
+input[type="submit"] {
+    font-family: "GmarketSans", "Noto Sans",sans-serif;
 }
 article,
 aside,

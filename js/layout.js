@@ -9,6 +9,13 @@ $(function(){
 		$('.menu').fadeOut();
 	});
 
+	$('#share').click(function(event) {
+		$('.menu').fadeOut();
+		$('.header .r_hcont .second .h_btn.p_people').removeClass('on').addClass('off');
+		$('.header .r_hcont .second .h_btn.share').removeClass('off').addClass('on');
+		shareStart();
+	});
+
 	// chat
 	$('.header .r_hcont .second .h_btn.chat').click(function(event) {
 		var self = $(this);

@@ -42,7 +42,7 @@
 					
 					<div class="d_ib second">
 						<div>
-							<a href="#" class="h_btn share" data-tooltip="화면공유"></a>
+							<a href="#" class="h_btn share off" data-tooltip="화면공유"></a>
 							<a href="#" class="h_btn p_people on" data-tooltip="참여자"></a>
 							<a href="#" class="h_btn chat off" data-tooltip="채팅"></a>
 						</div>
@@ -95,13 +95,25 @@
 
 			<div class="cont">
 				<div class="view_all" style="display: none;">
-					<!-- share video -->
+					<div>
+						<video id='share_video' autoplay playsinline>
+					</div>
 				</div>
-				<div class="self_view" style="display: none;">
-					<!-- self video -->
+				<div class="chat1_1_cc" style="display: none;">
+					<p>PC 화면</p> 
+					<p>공유 중</p>
+					<p>입니다</p>
+					<a href="#">종료하기</a>
 				</div>
-				<div class="share_end" style="display: none;">
-					<!-- end button -->
+				<div class="view_lbox" style="display: none;">
+					<div class="self_view">
+						<div>
+							<video id='self_video' autoplay playsinline></video>
+							<div class="info_ctxt">
+								<div class="nicknm"></div>
+							</div>
+						</div>
+					</div>
 				</div>
 				<div class="inner">
 					<div class="slide_wrap">
@@ -131,9 +143,13 @@
 						<ul>
 							<li>개설자<span class="c_y"></span></li>
 							<li>현재 참여인원<span class="c_r"></span></li>
+							<li>방 번호<span class="c_r"></span></li>
 						</ul>
-						<div class="cc_btn">
+						<div class="cc_btn" style="margin-bottom: 7px;">
 							<a id="disconnect" onclick="socket.emit('meeting_disconnect')" href="https://localhost/exit"><span></span>나가기</a>
+						</div>
+						<div class="cc_btn">
+							<a id="share" href="#"><span></span>화면 공유</a>
 						</div>
 					</div>
 				</div>
@@ -153,6 +169,8 @@
 				</div>
 			</div>
     </body>
+	<script src="../js/data.js"></script>
+	<script src="../js/share.js"></script>
 	<script src="../js/oneToOne.js"></script>
 	<script src="../js/message.js"></script>
 	<script src="../js/meeting.js"></script>

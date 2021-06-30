@@ -350,6 +350,7 @@ io.on('connection', function(socket) {
                 numOfUsers: 1,
                 roomType: message.roomType,
                 userName: message.userName,
+                leaderName: message.userName,
             });
             numOfUsers[message.roomId] = 1;
             return;
@@ -360,6 +361,7 @@ io.on('connection', function(socket) {
             numOfUsers: ++numOfUsers[message.roomId],
             roomType: message.roomType,
             userName: message.userName,
+            leaderName: users[roomLeader]['user_name'],
         });
     });
 
