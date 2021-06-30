@@ -165,6 +165,8 @@ function meetingUserExitHandler(message) {
     let socketId = message.id;
     let userName = message.userName;
 
+    if(socketId === roomLeader) document.getElementById('disconnect').click();
+
     document.getElementsByClassName('c_r')[0].innerHTML = --numOfUsers + '명';
     document.getElementById('num_user_span').innerHTML = numOfUsers + '명';
 

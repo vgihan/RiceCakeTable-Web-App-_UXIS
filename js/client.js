@@ -44,7 +44,7 @@ let roomId;     //방 id
 let roomType;   //방 타입 (meeting or seminar)
 let numOfUsers; //방 접속 인원 수
 let roomTime;   //
-let shareSwitch = {};   //화면 공유 스위치 (방 당 1명 밖에 공유 못함)
+let shareSwitch = false;   //화면 공유 스위치 (방 당 1명 밖에 공유 못함)
 //----------------------------------------------------------------------------------------
 
 onload();
@@ -249,4 +249,16 @@ socket.on('get_chat', function(data) {
 
 socket.on("get_1_1_request", (message) => {
     get11Request(message);
+});
+
+socket.on("share_request", (message) => {
+    shareRequestHandler(message);
+});
+
+socket.on("share_disconnect", () => {
+    responseShareDisconnect();
+});
+
+socket.on("share_possible", () => {
+    shareStart();
 });

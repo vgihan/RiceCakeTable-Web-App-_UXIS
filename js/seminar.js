@@ -132,7 +132,7 @@ function seminarUserExitHandler(message) {
     if(message.socketId !== roomLeader) {
         document.getElementsByClassName('c_r')[0].innerHTML = --numOfUsers + '명';
         document.getElementById('num_user_span').innerHTML = numOfUsers + '명';
-        
+
         var userBox = document.getElementsByClassName(message.socketId)[0];
         userBox.parentNode.removeChild(userBox);
         return;

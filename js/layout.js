@@ -11,9 +11,7 @@ $(function(){
 
 	$('#share').click(function(event) {
 		$('.menu').fadeOut();
-		$('.header .r_hcont .second .h_btn.p_people').removeClass('on').addClass('off');
-		$('.header .r_hcont .second .h_btn.share').removeClass('off').addClass('on');
-		shareStart();
+		shareRequest();
 	});
 
 	// chat
@@ -33,6 +31,13 @@ $(function(){
 			$('.header .r_hcont .second .h_btn.share').removeClass("on").addClass("off");
 			self.removeClass("off").addClass("on");
 		}
+		if(!shareSwitch) {
+			if(socket.id === roomLeader) document.getElementsByClassName('chat1_1_cc')[0].style = "display: none;";
+			document.getElementsByClassName('view_lbox')[0].style = "display: none;";
+			document.getElementsByClassName('nicknm')[0].style = "display:none;";
+		}
+		document.getElementsByClassName('view_all')[0].style = "display: none;";
+		document.getElementsByClassName('inner')[0].style = "display: block;";
 	});
 
 	$('.header .r_hcont .second .h_btn.share').click(function(event) {
@@ -41,6 +46,13 @@ $(function(){
 			$('.header .r_hcont .second .h_btn.p_people').removeClass("on").addClass("off");
 			self.removeClass("off").addClass("on");
 		}
+		if(!shareSwitch) {
+			if(socket.id === roomLeader) document.getElementsByClassName('chat1_1_cc')[0].style = "display: block;";
+			document.getElementsByClassName('view_lbox')[0].style = "display: block;";
+			document.getElementsByClassName('nicknm')[0].style = "display: block";
+		}
+		document.getElementsByClassName('view_all')[0].style = "display: block;";
+		document.getElementsByClassName('inner')[0].style = "display: none;";
 	});
 	
 	// slick

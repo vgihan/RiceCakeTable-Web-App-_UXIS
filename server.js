@@ -46,9 +46,14 @@ let receivePCs = {
     'share':{}
 };
 
-let userStreams = {};
+let userStreams = {
+    'seminar':{},
+    'meeting':{},
+    'share':{},
+};
 let numOfUsers = {};
 
+let shareSwitch = {};
 let ontrackSwitch = false;
 //-------------------------------------------------------------------------------------
 
@@ -182,6 +187,7 @@ const pc_config = {
 let ontrackHandler = {
     'meeting': meetingOntrackHandler,
     'seminar': seminarOntrackHandler,
+    'share': shareOntrackHandler,
 };
 
 let joinRoomHandler = {
@@ -201,7 +207,6 @@ io.on('connection', function(socket) {
             var roomId = message.roomId;
             var userName = message.userName;
             
-            console.log(roomId,',',socketId,',',userName);
             let pc = createReceiverPeerConnection(socket, roomId, userName, ontrackHandler[message.purpose], message.purpose);
             let answer = await createReceiverAnswer(offer, pc);
 
@@ -224,10 +229,12 @@ io.on('connection', function(socket) {
             let senderSocketId = message.senderSocketId;
             let receiverSocketId = message.receiverSocketId;
 
+            //console.log(userStreams['share'][senderSocketId].getVideoTracks().length);
+
             let pc = createSenderPeerConnection(
                 receiverSocketId,
                 senderSocketId,
-                userStreams[senderSocketId],
+                userStreams[purpose][senderSocketId],
                 purpose,
             );
             let answer = await createSenderAnswer(offer, pc);
@@ -285,7 +292,8 @@ io.on('connection', function(socket) {
             let socketId = socket.id;
             let userName = users[socket.id]['user_name'];
             let roomType = rooms[roomId]['room_type'];
-            
+            let roomLeader = rooms[roomId]['room_leader'];
+
             if(users[roomId]){
                 delete roomToTime[roomId];
             }
@@ -303,6 +311,16 @@ io.on('connection', function(socket) {
                 userName: userName,
                 purpose: roomType,
             });
+
+            if(roomLeader !== socket.id) closeSenderPCs(socket.id, 'meeting');
+            else {
+                for(var key in roomList[roomId]) {
+                    closeReceiverPC(key, 'meeting');
+                }
+                delete userStreams['meeting'][socket.id];
+                delete rooms[roomId];
+                delete roomList[roomId];
+            }
         } catch (error) {
             console.error(error);
         }
@@ -326,13 +344,33 @@ io.on('connection', function(socket) {
                 for(var key in roomList[roomId]) {
                     closeReceiverPC(key, 'seminar');
                 }
-                delete userStreams[socket.id];
+                delete userStreams['seminar'][socket.id];
                 delete rooms[roomId];
                 delete roomList[roomId];
             }
         } catch(err) {
             console.error(err);
         }
+    });
+
+    socket.on('share_disconnect', () => {
+        receivePCs['share'][socket.id].close();
+        delete receivePCs['share'][socket.id];
+
+        for(var key in roomList[users[socket.id]['room_id']]) {
+            if(!sendPCs['share'][key]) continue;
+
+            sendPCs['share'][key].close();
+            delete sendPCs['share'][key];
+
+            if(!userStreams['share'][key]) continue;
+
+            delete userStreams['share'][key];
+        }
+
+        socket.broadcast.to(users[socket.id]['room_id']).emit('share_disconnect');
+
+        delete shareSwitch[users[socket.id]['room_id']];
     });
 
     socket.on('room_info', (message) => {
@@ -411,9 +449,16 @@ io.on('connection', function(socket) {
     });
 
     socket.on("leader_socket_id_request", (message) => {
-        socket.emit("leader_socket_id_response", {
+        io.to(socket.id).emit("leader_socket_id_response", {
             leaderSocketId: rooms[message.roomId]['room_leader'],
         });
+    });
+
+    socket.on("share_question", () => {
+        if(shareSwitch[users[socket.id]['room_id']]) return;
+
+        io.to(socket.id).emit("share_possible");
+        shareSwitch[users[socket.id]['room_id']] = true;
     });
 });
 
@@ -498,7 +543,7 @@ function meetingOntrackHandler(stream, socket, roomId, userName) {
         ontrackSwitch = false;
         return;
     }
-    userStreams[socket.id] = stream;
+    userStreams['meeting'][socket.id] = stream;
 
     socket.broadcast.to(roomId).emit("user_enter", { 
         socketId: socket.id,
@@ -526,7 +571,7 @@ function seminarOntrackHandler(stream, socket, roomId, userName) {
         ontrackSwitch = false;
         return;
     }
-    userStreams[socket.id] = stream;
+    userStreams['seminar'][socket.id] = stream;
 
     socket.broadcast.to(roomId).emit("user_enter", { 
         socketId: socket.id,
@@ -547,6 +592,20 @@ function seminarOntrackHandler(stream, socket, roomId, userName) {
 
     ontrackSwitch = true;
     return;
+}
+
+function shareOntrackHandler(stream, socket, roomId, userName) {
+    if(ontrackSwitch) {
+        ontrackSwitch = false;
+        return;
+    }
+    socket.broadcast.to(roomId).emit('share_request', {
+        userName: userName,
+        socketId: socket.id,
+    });
+    userStreams['share'][socket.id] = stream;
+
+    ontrackSwitch = true;
 }
 
 function meetingJoinRoomHandler(message, socket) {
