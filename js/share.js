@@ -3,7 +3,7 @@ function shareStart() {
         audio:true,
         video:true
     }).then(async function(stream){ 
-        document.getElementsByClassName('nicknm').innerHTML = userName;
+        document.getElementsByClassName('nicknm')[0].innerHTML = userName;
 
         document.getElementsByClassName('view_all')[0].style = 'display: block;';
         document.getElementsByClassName('view_lbox')[0].style = 'display: block;';
