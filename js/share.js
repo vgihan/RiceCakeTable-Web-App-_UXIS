@@ -10,7 +10,12 @@ function shareStart() {
         document.getElementsByClassName('chat1_1_cc')[0].style = 'display: block;';
         document.getElementsByClassName('inner')[0].style = 'display: none;';
 
-        document.getElementById('share_video').srcObject = stream;
+        var selfStream = new MediaStream();
+        selfStream.addTrack(stream.getVideoTracks()[0]);
+
+        document.getElementById('share_video').srcObject = selfStream;
+        
+
     }).catch(error => {
             console.log('error display stream',error);
     });
