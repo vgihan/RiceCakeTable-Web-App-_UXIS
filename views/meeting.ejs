@@ -1,0 +1,143 @@
+  
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="Generator" content="EditPlus®" />
+        <meta name="Author" content="" />
+        <meta name="Keywords" content="" />
+        <meta name="Description" content="" />
+        <title>BETTER TEACHING</title>
+        <!--css-->
+        <link rel="stylesheet" href="../css/reset.css" />
+        <link rel="stylesheet" href="../css/font.css" />
+        <link rel="stylesheet" href="../css/layout.css" />
+        <link rel="stylesheet" href="../css/jquery.mCustomScrollbar.min.css" />
+		<link rel="stylesheet" href="../css/slick.css" />
+        <!--js-->
+		<script src="/socket.io/socket.io.js"></script>
+        <script src="../js/jquery-3.4.1.min.js"></script>
+		<script src="../js/slick.min.js"></script>
+        <script src="../js/jquery.mCustomScrollbar.js"></script>
+        <script src="../js/layout.js"></script>
+		<script>
+			
+		</script>
+    </head>
+    <body>
+		<p id='room_id' style="display: none;"><%= roomId %></p>
+		<p id='user_name' style="display: none;"><%= userName %></p>
+		<p id='room_type' style="display: none;"><%= roomType %></p>
+
+        <div class="wrap view">
+			<!--header : s -->
+			<div class="header">
+				<div class="flo_left l_hcont">
+					<img src="img/menu_icon.png" alt="메뉴" class="menuicon"/>
+					<h1>함께하는 방과후 English Class</h1>
+				</div>				
+				<div class="flo_right r_hcont">
+					<div class="d_ib first">
+						<p class="people">현재 참여인원</p>
+						<p class="people_nm"><span><img src="img/people_nm.png" alt="인원수"/></span><span id='num_user_span'></span></p>
+					</div>
+					
+					<div class="d_ib second">
+						<div>
+							<a href="#" class="h_btn share off" data-tooltip="화면공유"></a>
+							<a href="#" class="h_btn p_people on" data-tooltip="참여자"></a>
+							<a href="#" class="h_btn chat off" data-tooltip="채팅"></a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--header : e -->
+
+			<!-- chatbox : s -->
+			<div class="list chatbox">
+				<div class="top mCustomScrollbar">
+					<ul id="chat_inners">
+						<!--
+						<li>
+							<h1>참여자 1</h1>
+							<p>선생님~~ 방금 말씀하시거나 나중에 혹시 재방도 가능하실까요?? 오늘 수업 너무 좋은거 같아서 다시 한번 듣고 싶어서 그래요~~</p>
+						</li>
+						<li>
+							<h1>참여자 2</h1>
+							<p>고마워요~~하지만 오늘 중요한 수업인 만큼 집중해서 잘 들으시고, 재방은 어렵습니다.</p>
+						</li>
+						-->
+					</ul>
+				</div>
+				<div class="bottom">
+					<textarea id ="msg_box" onkeyup="enterkey()" placeholder="메세지를 입력하세요"></textarea>
+					<div class="btn_file">
+						<a class="btn" input type="button" onclick="send_msg()">전송</a>
+						<a href="" class="file"><img src="img/icon_file.png"/></a>
+					</div>
+				</div>
+			</div>
+			<!-- chatbox : e -->
+
+			<div class="cont">
+				<div class="inner">
+					<div class="slide_wrap">
+						<div class="slide_box ty01">
+							<ul>
+								<!-- User Space -->
+							</ul>
+						</div>						
+					</div>
+				</div>
+			</div>		
+
+			<!--footer : s -->
+			<div class="footer">
+				<p>Copyright(c) By UXIS all rights reserved</p>
+			</div>			
+		</div>
+
+		<!--menu open : s-->
+			<div class="menu">
+				<div class="inner">
+					<div class="menubox">
+						<div class="cancel">
+							<img src="img/menu_cancel.png" alt="닫기버튼" class="cancelicon"/>
+						</div>
+						<h1>함께하는 방과후 English Class1</h1>
+						<ul>
+							<li>개설자<span class="c_y"></span></li>
+							<li>현재 참여인원<span class="c_r"></span></li>
+							<li>방 번호<span class="c_r"></span></li>
+						</ul>
+						<div class="cc_btn" style="margin-bottom: 7px;">
+							<a id="disconnect" onclick="socket.emit('meeting_disconnect')" href="https://localhost/exit"><span></span>나가기</a>
+						</div>
+						<div class="cc_btn">
+							<a id="share" href="#"><span></span>화면 공유</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!--menu open : e-->
+
+			<div class="chat_accept" style="display: none;">
+				<div class="inner">
+					<div class="ca_box">						
+						<p><span class="c_y"></span>님이</p>
+						<p>1 : 1 대화를 신청하셨습니다</p>						
+						<div class="ca_btn">
+							<a href="view_share.html" class="accept"><span></span>수락하기</a>
+							<a class="refusal"><span></span>거절하기</a>
+						</div>
+					</div>
+				</div>
+			</div>
+    </body>
+	<script src="../js/share.js"></script>
+	<script src="../js/oneToOne.js"></script>
+	<script src="../js/message.js"></script>
+	<script src="../js/meeting.js"></script>
+	<script src="../js/client.js"></script>
+</html>
