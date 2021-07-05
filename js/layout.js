@@ -6,7 +6,12 @@ $(function(){
 	});
 	
 	$('.cancelicon').click(function(event) {
-		$('.menu').fadeOut();	
+		$('.menu').fadeOut();
+	});
+
+	$('#share').click(function(event) {
+		$('.menu').fadeOut();
+		shareRequest();
 	});
 
 	// chat
@@ -19,6 +24,42 @@ $(function(){
             self.removeClass("on").addClass("off");
         }
 	});
+
+	$('.header .r_hcont .second .h_btn.p_people').click(function(event) {
+		var self = $(this);	
+		if (self.hasClass("off")) {
+			$('.header .r_hcont .second .h_btn.share').removeClass("on").addClass("off");
+			self.removeClass("off").addClass("on");
+		}
+		if(shareSwitch) {
+			if(socket.id === shareSocketId) {
+				document.getElementsByClassName('chat1_1_cc')[0].style = "display: none;";
+				return;
+			}
+			document.getElementsByClassName('view_lbox')[0].style = "display: none;";
+			document.getElementsByClassName('view_all')[0].style = "display: none;";
+			console.log('meeting display');
+		}
+		document.getElementsByClassName('inner')[0].style = "display: block;";
+	});
+
+	$('.header .r_hcont .second .h_btn.share').click(function(event) {
+		var self = $(this);	
+		if (self.hasClass("off")) {
+			$('.header .r_hcont .second .h_btn.p_people').removeClass("on").addClass("off");
+			self.removeClass("off").addClass("on");
+		}
+		if(shareSwitch) {
+			if(socket.id === shareSocketId) {
+				document.getElementsByClassName('chat1_1_cc')[0].style = "display: block;";
+				return;
+			}
+			document.getElementsByClassName('view_lbox')[0].style = "display: block;";
+			document.getElementsByClassName('view_all')[0].style = "display: block;";
+			console.log('share display');
+		}
+		document.getElementsByClassName('inner')[0].style = "display: none;";
+	});
 	
 	// slick
 	$('.slide_box.ty01').slick({		
@@ -29,7 +70,7 @@ $(function(){
 		dots :true, 	
 		autoplay : false,		
 		autoplaySpeed : 6000, 
-		dotsClass : "slick-dots", 	//¾Æ·¡ ³ª¿À´Â ÆäÀÌÁö³×ÀÌ¼Ç(Á¡) css class ÁöÁ¤	
+		dotsClass : "slick-dots", 	//ï¿½Æ·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¼ï¿½(ï¿½ï¿½) css class ï¿½ï¿½ï¿½ï¿½	
 
 	});
 
@@ -45,8 +86,5 @@ $(function(){
 		autoplaySpeed : 6000, 
 		
 	});
-		
-	
-	
 });
 
