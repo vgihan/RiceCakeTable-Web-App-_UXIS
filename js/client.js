@@ -303,7 +303,6 @@ socket.on("share_possible", () => {
     shareStart();
 });
 
-//#11
 socket.on("get_1_1_request", (message) => {
     get11Request(message);
 });
@@ -316,11 +315,22 @@ socket.on("refusal_request", (message) => {
     get11Refusal(message);
 });
 
-socket.on("other_request", (message) => {
-    get11Other(message);
+socket.on("other_accept_request", (message) => {
+    setOther(message);
+});
+
+socket.on("other_end_request", (message) => {
+    endOther(message);
+});
+
+socket.on("other_ing_request", (message) => {
+    ingOther(message);
+});
+
+socket.on("other_noing_request", (message) => {
+    noIngOther(message);
 });
 
 socket.on("end_request", () => {
     end_1_1();
 });
-//#11
