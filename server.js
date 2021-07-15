@@ -425,12 +425,12 @@ io.on('connection', function(socket) {
             try{
                 if(!sendPCs['share'][socket.id][key]) continue;
 
-            sendPCs['share'][socket.id][key].close();
-            delete sendPCs['share'][socket.id][key];
+	    	sendPCs['share'][socket.id][key].close();
+	    	delete sendPCs['share'][socket.id][key];
 
-            if(!userStreams['share'][socket.id][key]) continue;
+	    	if(!userStreams['share'][socket.id][key]) continue;
 
-            delete userStreams['share'][socket.id][key];
+	    	delete userStreams['share'][socket.id][key];
             }
             catch{
                 delete userStreams['share'][socket.id][key];
