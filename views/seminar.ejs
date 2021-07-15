@@ -74,11 +74,11 @@
 					<textarea id ="msg_box" onkeyup="enterkey()" placeholder="메세지를 입력하세요"></textarea>
 					<div class="btn_file">
 						<!-- file upload -->
-						<a id="btn_send" class="btn" input type="button" onclick="send_msg(); send_file();">전송</a>
+						<a id="btn_send" class="btn" input type="button" onclick="send_msg(); send_file();" style="cursor:pointer">전송</a>
 						<form id="btn_file" action="/send-file" method="post" target="if" enctype="multipart/form-data">
 							<input type="hidden" name="file_roomid">
 							<input type="file" name="uploadFile" style ='display:none' onchange="show_file(this);" multiple="multiple">
-							<img src="img/icon_file.png" onclick="select_file();">
+							<img src="img/icon_file.png" onclick="select_file();" style="cursor:pointer">
 							<input type="submit" name="btn_submit" style="display:none">
 						</form>
 						<iframe name="if" style="display:none"></iframe>
@@ -101,8 +101,8 @@
 							<li>방 번호<span class="c_r"></span></li>
 						</ul>
 						<div class="cc_btn" style="margin-bottom: 7px;">
-							<!-- <a id='disconnect' onclick="browserDisconnect()" href="https://betterteaching.xyz/exit"><span></span>나가기</a> -->
-							<a id='disconnect' onclick="browserDisconnect()" href="https://localhost/exit"><span></span>나가기</a>
+							<a id='disconnect' onclick="browserDisconnect()" href="https://betterteaching.xyz/exit"><span></span>나가기</a>
+							<!-- <a id='disconnect' onclick="browserDisconnect()" href="https://localhost/exit"><span></span>나가기</a> -->
 						</div>
 						<div class="cc_btn" style="margin-bottom: 7px;">
 							<a id="share" onclick="shareRequest()"><span></span>화면 공유</a>
