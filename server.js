@@ -479,19 +479,26 @@ io.on('connection', function(socket) {
         });
     });
 
-    //#11
-    socket.on('request_1_1', (message) => {
-        // let target
-        // for(var key in users) {
-        //     if(users[key]['user_name'] === message.target) target = key;
-        // }
-        io.to(message.target).emit('get_1_1_request', {
-            userName: message.userName,
-            userId: message.socketId
-        });
-    });
-
     
+    socket.on('request_1_1', (message) => {
+        if(message.text == "1 : 1 대화신청") {
+            for(var key in roomList[message.roomId]) {
+                if(key === message.target) { // 건 사람에게
+                    io.to(key).emit('get_1_1_request', {
+                        userName: message.userName,
+                        userId: message.socketId
+                    });
+                }
+                else if(key !== message.socketId){
+                    io.to(key).emit('other_ing_request', { // 나머지 사람에게
+                        user1Id: message.socketId,
+                        user2Id: message.target
+                    });
+                }
+            }
+        }
+    });
+ 
     socket.on('accept_1_1', (message) => {
         for(var key in roomList[message.roomId]) {
             if(key === message.target) { // 건 사람에게
@@ -500,22 +507,42 @@ io.on('connection', function(socket) {
                     userId: message.socketId
                 });
             }
-            else if(key !== socket.id){
-                io.to(key).emit('other_request', { // 나머지 사람에게
+            else if(key !== message.socketId){
+                io.to(key).emit('other_accept_request', { // 나머지 사람에게
                     user1Id: message.socketId,
                     user2Id: message.target
                 });
             }
         }
     })
+	
     socket.on('refusal_1_1', (message) => {
-        io.to(message.target).emit('refusal_request',{userName: message.userName});
+        for(var key in roomList[message.roomId]) {
+            if(key === message.target) { // 건 사람에게
+                io.to(key).emit('refusal_request',{userName: message.userName});
+            }
+            else if(key !== message.socketId){
+                io.to(key).emit('other_noing_request', { // 나머지 사람에게
+                    user1Id: message.socketId,
+                    user2Id: message.target
+                });
+            }
+        }
     })
 
     socket.on('end_1_1', (message) => {
-        io.to(message.target).emit('end_request');
+        for(var key in roomList[message.roomId]) {
+            if(key === message.target) { // 건 사람에게
+                io.to(key).emit('end_request');
+            }
+            else if(key !== message.socketId){
+                io.to(key).emit('other_end_request', { // 나머지 사람에게
+                    user1Id: message.socketId,
+                    user2Id: message.target
+                });
+            }
+        }
     })
-    //#11
 
     //화면 공유
     socket.on('display_share', (message) => {
