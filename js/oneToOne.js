@@ -1,6 +1,7 @@
-//#11
 let targetId;
 let targetName;
+
+let talking_stream = {};
 
 // (건 사람) 1:1 대화하기 버튼 누르면
 function request_1_1(e) {
@@ -9,7 +10,8 @@ function request_1_1(e) {
             socketId: socket.id,
             target: e.target.id,
             userName: userName,
-            possible: document.getElementById(e.target.id).innerHTML
+            roomId: roomId,
+            text: document.getElementById(e.target.id).innerHTML
         });
     }
 }
@@ -40,7 +42,8 @@ function refusal_1_1() {
     socket.emit("refusal_1_1",{
         socketId: socket.id,
         target: targetId,
-        userName: userName
+        userName: userName,
+        roomId: roomId
     });
     targetId = null;
     targetName = null;
@@ -69,14 +72,16 @@ function set11(id,name){
     
     document.getElementById('target_video').srcObject = userStreams['meeting'][id];
     document.getElementById('my_video').srcObject = selfStream;
-    document.getElementsByClassName('target_nicknm')[0].innerHTML = name;
 }
 
 // 1:1 종료
 function end_1_1() {
-    socket.emit("end_1_1",{target: targetId});
+    socket.emit("end_1_1",{
+        socketId: socket.id,
+        target: targetId,
+        roomId: roomId
+    });
 
-    document.getElementsByClassName('target_nicknm')[0].innerHTML = '';
     document.getElementById('target_video').srcObject = null;
     document.getElementById('my_video').srcObject = null;
 
@@ -87,16 +92,33 @@ function end_1_1() {
     targetName=null;
 }
 
-// (다른사람들 - 시작)
-function get11OtherStart(message) {
-    console.log("누군가 1:1 시작함");
-    setOther(message.user1Id,message.user2Id);
+// 1:1 대화 안하는 사람들
+function setOther(message) {
+    receiveVideos['meeting'][message.user1Id].srcObject = null;
+    receiveVideos['meeting'][message.user2Id].srcObject = null;
+    document.getElementById(message.user1Id).innerHTML = "1 : 1 대화 중";
+    document.getElementById(message.user1Id).setAttribute('style', 'background:#8f8f8f;');
+    document.getElementById(message.user2Id).innerHTML = "1 : 1 대화 중";
+    document.getElementById(message.user2Id).setAttribute('style', 'background:#8f8f8f;');
+
 }
-// (다른 사람들)
-function setOther(user1Id,user2Id){
-    console.log(user1Id);
-    console.log(user2Id);
+function endOther(message) {
+    receiveVideos['meeting'][message.user1Id].srcObject = userStreams['meeting'][message.user1Id];
+    receiveVideos['meeting'][message.user2Id].srcObject = userStreams['meeting'][message.user2Id];
+    document.getElementById(message.user1Id).innerHTML = "1 : 1 대화신청";
+    document.getElementById(message.user1Id).setAttribute('style', 'background:#ffcc00;');
+    document.getElementById(message.user2Id).innerHTML = "1 : 1 대화신청";
+    document.getElementById(message.user2Id).setAttribute('style', 'background:#ffcc00;');
 }
-//#11
+
+function ingOther(message) {
+    document.getElementById(message.user1Id).innerHTML = "1 : 1 요청 중";
+    document.getElementById(message.user2Id).innerHTML = "1 : 1 요청받음";
+}
+
+function noIngOther(message) {
+    document.getElementById(message.user1Id).innerHTML = "1 : 1 대화신청";
+    document.getElementById(message.user2Id).innerHTML = "1 : 1 대화신청";
+}
 
 
