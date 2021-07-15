@@ -365,7 +365,7 @@ io.on('connection', function(socket) {
 
             if(roomList[roomId]===undefined){
                 delete roomToTime[roomId];
-		delete_directory(__dirname+'/uploads/'+roomId); //file upload
+		        delete_directory(__dirname+'/uploads/'+roomId); //file upload
             }
         } catch (error) {
             console.error(error);
@@ -405,36 +405,37 @@ io.on('connection', function(socket) {
             }
             if(roomList[roomId]===undefined){
                 delete roomToTime[roomId];
-		delete_directory(__dirname+'/uploads/'+roomId); //file upload
+		        delete_directory(__dirname+'/uploads/'+roomId); //file upload
             }
         } catch(err) {
             console.error(err);
         }
         show_state('seminar')
     });
-
+    
     socket.on('share_disconnect', () => {
         console.log('share disconnect');
 
         if(!shareSwitch[users[socket.id]['room_id']]) return;
+        shareSwitch[users[socket.id]['room_id']] =false;
 
         receivePCs['share'][socket.id].close();
         delete receivePCs['share'][socket.id];
-
         for(var key in roomList[users[socket.id]['room_id']]) {
             try{
                 if(!sendPCs['share'][socket.id][key]) continue;
 
-	    	sendPCs['share'][socket.id][key].close();
-	    	delete sendPCs['share'][socket.id][key];
+                sendPCs['share'][socket.id][key].close();
+                delete sendPCs['share'][socket.id][key];
 
-	    	if(!userStreams['share'][socket.id][key]) continue;
+                if(!userStreams['share'][socket.id][key]) continue;
 
-	    	delete userStreams['share'][socket.id][key];
+                delete userStreams['share'][socket.id][key];
             }
             catch{
                 delete userStreams['share'][socket.id][key];
             }
+
 
         }
         delete sendPCs['share'][socket.id];
@@ -442,7 +443,7 @@ io.on('connection', function(socket) {
         socket.broadcast.to(users[socket.id]['room_id']).emit('share_disconnect');
 
         //delete shareSwitch[users[socket.id]['room_id']];
-        shareSwitch[users[socket.id]['room_id']] =false;
+        
         delete shareUserId[users[socket.id]['room_id']];
     });
 
@@ -621,7 +622,6 @@ function createReceiverPeerConnection(socket, roomId, userName, ontrackHandler, 
     var once_ontrack=1
     pc.ontrack = (e) => {
         if(once_ontrack==1){ //video, audio로 두번하므로 한번만 하도록
-            console.log("once check");
             ontrackHandler(e.streams[0], socket, roomId, userName);
         }
         once_ontrack+=1;
