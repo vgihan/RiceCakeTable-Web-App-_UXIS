@@ -422,7 +422,8 @@ io.on('connection', function(socket) {
         delete receivePCs['share'][socket.id];
 
         for(var key in roomList[users[socket.id]['room_id']]) {
-            if(!sendPCs['share'][socket.id][key]) continue;
+            try{
+                if(!sendPCs['share'][socket.id][key]) continue;
 
             sendPCs['share'][socket.id][key].close();
             delete sendPCs['share'][socket.id][key];
@@ -430,6 +431,10 @@ io.on('connection', function(socket) {
             if(!userStreams['share'][socket.id][key]) continue;
 
             delete userStreams['share'][socket.id][key];
+            }
+            catch{
+                delete userStreams['share'][socket.id][key];
+            }
 
         }
         delete sendPCs['share'][socket.id];
