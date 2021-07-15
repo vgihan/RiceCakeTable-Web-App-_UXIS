@@ -24,41 +24,79 @@ $(function(){
         }
 	});
 
-	$('.header .r_hcont .second .h_btn.p_people').click(function(event) {
+	$('.header .r_hcont .second .h_btn.p_people').click(function(event) {  //참가자버튼
 		var self = $(this);	
 		if (self.hasClass("off")) {
 			$('.header .r_hcont .second .h_btn.share').removeClass("on").addClass("off");
 			self.removeClass("off").addClass("on");
 		}
-		if(shareSwitch) {
-			if(socket.id === shareSocketId) {
-				document.getElementsByClassName('chat1_1_cc')[0].style = "display: none;";
-				return;
+
+		if(roomType === 'meeting'){
+			if(shareSwitch) {
+				if(socket.id === shareSocketId) {
+					document.getElementsByClassName('chat1_1_cc')[0].style = "display: none;";
+					document.getElementsByClassName('inner')[0].style = "display: block;";
+					return;
+				}
+				document.getElementsByClassName('view_lbox')[0].style = "display: none;";
+				document.getElementsByClassName('view_all')[0].style = "display: none;";
+	
 			}
-			document.getElementsByClassName('view_lbox')[0].style = "display: none;";
-			document.getElementsByClassName('view_all')[0].style = "display: none;";
-			console.log('meeting display');
+			document.getElementsByClassName('inner')[0].style = "display: block;";
+
 		}
-		document.getElementsByClassName('inner')[0].style = "display: block;";
+		
+
+		else if(roomType === 'seminar'){
+			if(shareSwitch) {
+				if(socket.id === shareSocketId) {
+					//document.getElementsByClassName('chat1_1_cc')[0].style = "display: none;";
+					document.getElementsByClassName('list_slide')[0].style = "display: block;";
+					return;
+				}
+	
+			}
+			document.getElementsByClassName('list_slide')[0].style = "display: block;";
+
+		}
+		
 	});
 
-	$('.header .r_hcont .second .h_btn.share').click(function(event) {
+	$('.header .r_hcont .second .h_btn.share').click(function(event) {   //공유버튼
 		var self = $(this);	
 		if (self.hasClass("off")) {
 			$('.header .r_hcont .second .h_btn.p_people').removeClass("on").addClass("off");
 			self.removeClass("off").addClass("on");
 		}
-		if(shareSwitch) {
-			if(socket.id === shareSocketId) {
-				document.getElementsByClassName('chat1_1_cc')[0].style = "display: block;";
-				return;
+
+		if(roomType === 'meeting'){
+			if(shareSwitch) {
+				if(socket.id === shareSocketId) {
+					document.getElementsByClassName('chat1_1_cc')[0].style = "display: block;";
+					document.getElementsByClassName('inner')[0].style = "display: none;";
+					return;
+				}
+				document.getElementsByClassName('view_lbox')[0].style = "display: block;";
+				document.getElementsByClassName('view_all')[0].style = "display: block;";
+				document.getElementsByClassName('inner')[0].style = "display: none;";
 			}
-			document.getElementsByClassName('view_lbox')[0].style = "display: block;";
-			document.getElementsByClassName('view_all')[0].style = "display: block;";
-			console.log('share display');
 		}
-	        //document.getElementsByClassName('inner')[0].style = "display: none;";
-		document.getElementById('cont_inner').style = "display: none;";
+
+		else if(roomType === 'seminar'){
+			if(shareSwitch) {
+				if(socket.id === shareSocketId) {
+					document.getElementsByClassName('chat1_1_cc')[0].style = "display: block;";
+					document.getElementsByClassName('list_slide')[0].style = "display: none;";
+					return;
+				}
+				
+			}
+				//document.getElementsByClassName('inner')[0].style = "display: none;";
+			
+			document.getElementsByClassName('list_slide')[0].style = "display: none;";
+		}
+		
+		
 	});
 	
 	// slick

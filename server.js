@@ -415,36 +415,41 @@ io.on('connection', function(socket) {
     
     socket.on('share_disconnect', () => {
         console.log('share disconnect');
+        try{
+            if(!shareSwitch[users[socket.id]['room_id']]) return;
+            shareSwitch[users[socket.id]['room_id']] =false;
 
-        if(!shareSwitch[users[socket.id]['room_id']]) return;
-        shareSwitch[users[socket.id]['room_id']] =false;
+            receivePCs['share'][socket.id].close();
+            delete receivePCs['share'][socket.id];
+            for(var key in roomList[users[socket.id]['room_id']]) {
+                try{
+                    if(!sendPCs['share'][socket.id][key]) continue;
 
-        receivePCs['share'][socket.id].close();
-        delete receivePCs['share'][socket.id];
-        for(var key in roomList[users[socket.id]['room_id']]) {
-            try{
-                if(!sendPCs['share'][socket.id][key]) continue;
+                    sendPCs['share'][socket.id][key].close();
+                    delete sendPCs['share'][socket.id][key];
 
-                sendPCs['share'][socket.id][key].close();
-                delete sendPCs['share'][socket.id][key];
+                    if(!userStreams['share'][socket.id][key]) continue;
 
-                if(!userStreams['share'][socket.id][key]) continue;
+                    delete userStreams['share'][socket.id][key];
+                }
+                catch{
+                    delete userStreams['share'][socket.id][key];
+                }
 
-                delete userStreams['share'][socket.id][key];
+
             }
-            catch{
-                delete userStreams['share'][socket.id][key];
-            }
+            delete sendPCs['share'][socket.id];
+            delete userStreams['share'][socket.id]
+            socket.broadcast.to(users[socket.id]['room_id']).emit('share_disconnect');
 
-
+            //delete shareSwitch[users[socket.id]['room_id']];
+            
+            delete shareUserId[users[socket.id]['room_id']];
         }
-        delete sendPCs['share'][socket.id];
-        delete userStreams['share'][socket.id]
-        socket.broadcast.to(users[socket.id]['room_id']).emit('share_disconnect');
+        catch(e){
+            console.error(e);
+        }
 
-        //delete shareSwitch[users[socket.id]['room_id']];
-        
-        delete shareUserId[users[socket.id]['room_id']];
     });
 
     socket.on('room_info', (message) => {

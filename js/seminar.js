@@ -15,7 +15,9 @@ function seminarStart(userName, roomId, leader) {
     if(leader !== socket.id) {
         audienceStart(userName, roomId, leader);
         document.getElementsByClassName('cc_btn')[1].style = 'display: none;';   //화면 공유 버튼 없애기
-        document.getElementsByClassName('h_btn share on')[0].style = 'display: none;';
+        //document.getElementsByClassName('h_btn share on')[0].style = 'display: none;';
+        document.getElementsByClassName('h_btn')[0].setAttribute("onclick","");
+
         
         return;
     }

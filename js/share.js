@@ -67,6 +67,7 @@ function shareOntrackHandler(stream, userName, senderSocketId) {  //공유받는
         document.getElementById('self_video').srcObject = userStreams['seminar'][senderSocketId];
         var nicknm_len = document.getElementsByClassName('nicknm').length
         document.getElementsByClassName('nicknm')[nicknm_len-1].innerHTML = userName;   //share video이름 설정
+        document.getElementsByClassName('list_slide')[0].style = "display: none;";
     }
 
     $('.header .r_hcont .second .h_btn.p_people').removeClass('on').addClass('off');
@@ -116,6 +117,7 @@ function shareDisconnect() {   //공유자의 화면설정
     }
     if(roomType == 'seminar'){//세미나인 경우
         document.getElementsByClassName('view_all')[0].style = "display: block;"; //원래 비디오 보이게
+        document.getElementsByClassName('list_slide')[0].style = "display: block;"; //참가자 보이게
     }
     $('.header .r_hcont .second .h_btn.p_people').removeClass('off').addClass('on');
     $('.header .r_hcont .second .h_btn.share').removeClass('on').addClass('off');
@@ -139,6 +141,7 @@ function responseShareDisconnect() {  //공유 받는자의 화면설정
         var view_all= document.getElementsByClassName('view_all')[0]
         view_all.removeChild(view_all.childNodes[0]);  //shareview 삭제
         document.getElementsByClassName('presenterVideo')[0].style = "display: block;"; //원래 비디오 보이게
+        document.getElementsByClassName('list_slide')[0].style = "display: block;"; //참가자 보이게
     }
     $('.header .r_hcont .second .h_btn.p_people').removeClass('off').addClass('on');
     $('.header .r_hcont .second .h_btn.share').removeClass('on').addClass('off');
