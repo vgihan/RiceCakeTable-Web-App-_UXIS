@@ -327,10 +327,6 @@ socket.on("other_ing_request", (message) => {
     ingOther(message);
 });
 
-socket.on("other_noing_request", (message) => {
-    noIngOther(message);
-});
-
 socket.on("end_request", () => {
     end_1_1();
 });
