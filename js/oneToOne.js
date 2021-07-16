@@ -3,7 +3,7 @@ let targetName;
 
 let talking_stream = {};
 
-// (건 사람) 1:1 대화하기 버튼 누르면
+// 1:1 대화하기 버튼 누르면
 function request_1_1(e) {
     if(document.getElementById(e.target.id).innerHTML == "1 : 1 대화신청"){
         socket.emit("request_1_1", {
@@ -16,7 +16,7 @@ function request_1_1(e) {
     }
 }
 
-// (받는사람) 1:1 대화하기 수락-거절 창 뜬다
+// 1:1 대화하기 수락-거절 창 뜬다
 function get11Request(message) {
     document.getElementsByClassName('c_y')[1].innerHTML = message.userName;
     document.getElementsByClassName('chat_accept')[0].setAttribute('style', 'display:block;');
@@ -24,7 +24,7 @@ function get11Request(message) {
     targetName = message.userName;
 }
 
-// (받는사람) 수락누름
+// 수락 누름
 function accept_1_1() {
     document.getElementsByClassName('chat_accept')[0].setAttribute('style', 'display: none;');
     socket.emit("accept_1_1",{
@@ -36,7 +36,7 @@ function accept_1_1() {
     set11(targetId,targetName);
 }
 
-// (받는사람) 거절누름
+// 거절 누름
 function refusal_1_1() {
     document.getElementsByClassName('chat_accept')[0].setAttribute('style', 'display: none;');
     socket.emit("refusal_1_1",{
@@ -49,14 +49,14 @@ function refusal_1_1() {
     targetName = null;
 }
 
-// (건사람) 수락받음
+// 수락 받음
 function get11Accept(message) {
     targetId = message.userId;
     targetName = message.userName;
     set11(targetId,targetName);
 }
 
-// (건사람) 거절받음
+// 거절 받음
 function get11Refusal(message) {
     document.getElementsByClassName('c_y')[2].innerHTML = message.userName;
     document.getElementsByClassName('chat_accept')[1].setAttribute('style', 'display:block;');
@@ -92,33 +92,53 @@ function end_1_1() {
     targetName=null;
 }
 
-// 1:1 대화 안하는 사람들
+// 수락 받았을 때 나머지 사람들
 function setOther(message) {
     receiveVideos['meeting'][message.user1Id].srcObject = null;
     receiveVideos['meeting'][message.user2Id].srcObject = null;
-    document.getElementById(message.user1Id).innerHTML = "1 : 1 대화 중";
-    document.getElementById(message.user1Id).setAttribute('style', 'background:#8f8f8f;');
-    document.getElementById(message.user2Id).innerHTML = "1 : 1 대화 중";
-    document.getElementById(message.user2Id).setAttribute('style', 'background:#8f8f8f;');
-
+    // document.getElementById(message.user1Id).innerHTML = "1 : 1 대화 중";
+    // document.getElementById(message.user1Id).setAttribute('style', 'background:#8f8f8f;');
+    // document.getElementById(message.user2Id).innerHTML = "1 : 1 대화 중";
+    // document.getElementById(message.user2Id).setAttribute('style', 'background:#8f8f8f;');
+    if(message.user1Id == roomLeader) {
+        document.getElementById(message.user1Id).innerHTML = "1 : 1 대화 중";
+        document.getElementById(message.user1Id).setAttribute('style', 'background:#8f8f8f;');
+    }
+    if(message.user2Id == roomLeader) {
+        document.getElementById(message.user2Id).innerHTML = "1 : 1 대화 중";
+        document.getElementById(message.user2Id).setAttribute('style', 'background:#8f8f8f;');
+    }
 }
+
+// 대화/요청받음 끝났을 때 나머지 사람들
 function endOther(message) {
     receiveVideos['meeting'][message.user1Id].srcObject = userStreams['meeting'][message.user1Id];
     receiveVideos['meeting'][message.user2Id].srcObject = userStreams['meeting'][message.user2Id];
-    document.getElementById(message.user1Id).innerHTML = "1 : 1 대화신청";
-    document.getElementById(message.user1Id).setAttribute('style', 'background:#ffcc00;');
-    document.getElementById(message.user2Id).innerHTML = "1 : 1 대화신청";
-    document.getElementById(message.user2Id).setAttribute('style', 'background:#ffcc00;');
+    // document.getElementById(message.user1Id).innerHTML = "1 : 1 대화신청";
+    // document.getElementById(message.user1Id).setAttribute('style', 'background:#ffcc00;');
+    // document.getElementById(message.user2Id).innerHTML = "1 : 1 대화신청";
+    // document.getElementById(message.user2Id).setAttribute('style', 'background:#ffcc00;');
+    if(message.user1Id == roomLeader) {
+        document.getElementById(message.user1Id).innerHTML = "1 : 1 대화신청";
+        document.getElementById(message.user1Id).setAttribute('style', 'background:#ffcc00;');
+    }
+    if(message.user2Id == roomLeader) {
+        document.getElementById(message.user2Id).innerHTML = "1 : 1 대화신청";
+        document.getElementById(message.user2Id).setAttribute('style', 'background:#ffcc00;');
+    }
 }
 
+// 요청 받았을 때 나머지 사람들
 function ingOther(message) {
-    document.getElementById(message.user1Id).innerHTML = "1 : 1 요청 중";
-    document.getElementById(message.user2Id).innerHTML = "1 : 1 요청받음";
+    // document.getElementById(message.user1Id).innerHTML = "1 : 1 요청 중";
+    // document.getElementById(message.user2Id).innerHTML = "1 : 1 요청받음";
+    if(message.user1Id == roomLeader) {
+        document.getElementById(message.user1Id).innerHTML = "1 : 1 요청받음";
+        document.getElementById(message.user1Id).setAttribute('style', 'background:#8f8f8f;');
+    }
+    if(message.user2Id == roomLeader) {
+        document.getElementById(message.user2Id).innerHTML = "1 : 1 요청받음";
+        document.getElementById(message.user2Id).setAttribute('style', 'background:#8f8f8f;');
+    }
 }
-
-function noIngOther(message) {
-    document.getElementById(message.user1Id).innerHTML = "1 : 1 대화신청";
-    document.getElementById(message.user2Id).innerHTML = "1 : 1 대화신청";
-}
-
 
