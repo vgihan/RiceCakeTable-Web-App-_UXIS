@@ -483,7 +483,7 @@ io.on('connection', function(socket) {
     socket.on('request_1_1', (message) => {
         if(message.text == "1 : 1 대화신청") {
             for(var key in roomList[message.roomId]) {
-                if(key === message.target) { // 건 사람에게
+                if(key === message.target) { // 1:1 받은 사람에게
                     io.to(key).emit('get_1_1_request', {
                         userName: message.userName,
                         userId: message.socketId
@@ -501,7 +501,7 @@ io.on('connection', function(socket) {
  
     socket.on('accept_1_1', (message) => {
         for(var key in roomList[message.roomId]) {
-            if(key === message.target) { // 건 사람에게
+            if(key === message.target) { // 1:1 건 사람에게
                 io.to(key).emit('accept_request', {
                     userName: message.userName,
                     userId: message.socketId
@@ -518,11 +518,11 @@ io.on('connection', function(socket) {
 	
     socket.on('refusal_1_1', (message) => {
         for(var key in roomList[message.roomId]) {
-            if(key === message.target) { // 건 사람에게
+            if(key === message.target) { // 1:1 건 사람에게
                 io.to(key).emit('refusal_request',{userName: message.userName});
             }
             else if(key !== message.socketId){
-                io.to(key).emit('other_noing_request', { // 나머지 사람에게
+                io.to(key).emit('other_end_request', { // 나머지 사람에게
                     user1Id: message.socketId,
                     user2Id: message.target
                 });
@@ -532,7 +532,7 @@ io.on('connection', function(socket) {
 
     socket.on('end_1_1', (message) => {
         for(var key in roomList[message.roomId]) {
-            if(key === message.target) { // 건 사람에게
+            if(key === message.target) { // 대화 상대방에게
                 io.to(key).emit('end_request');
             }
             else if(key !== message.socketId){
@@ -545,10 +545,10 @@ io.on('connection', function(socket) {
     })
 
     //화면 공유
-    socket.on('display_share', (message) => {
+    // socket.on('display_share', (message) => {
 
-    });
-
+    // });
+	
     socket.on('set_room_time', function(data) {
         if(roomToTime[data.roomId]===undefined)
             roomToTime[data.roomId]=data.time;
