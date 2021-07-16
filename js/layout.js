@@ -40,9 +40,9 @@ $(function(){
 				}
 				document.getElementsByClassName('view_lbox')[0].style = "display: none;";
 				document.getElementsByClassName('view_all')[0].style = "display: none;";
-	
+				document.getElementsByClassName('inner')[0].style = "display: block;";
 			}
-			document.getElementsByClassName('inner')[0].style = "display: block;";
+			
 
 		}
 		
@@ -54,9 +54,9 @@ $(function(){
 					document.getElementsByClassName('list_slide')[0].style = "display: block;";
 					return;
 				}
-	
+				document.getElementsByClassName('list_slide')[0].style = "display: block;";
 			}
-			document.getElementsByClassName('list_slide')[0].style = "display: block;";
+			
 
 		}
 		

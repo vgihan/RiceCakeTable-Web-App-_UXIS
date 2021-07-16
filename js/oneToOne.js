@@ -13,6 +13,7 @@ function request_1_1(e) {
             roomId: roomId,
             text: document.getElementById(e.target.id).innerHTML
         });
+        
     }
 }
 
@@ -54,12 +55,15 @@ function get11Accept(message) {
     targetId = message.userId;
     targetName = message.userName;
     set11(targetId,targetName);
+    
+
 }
 
 // 거절 받음
 function get11Refusal(message) {
     document.getElementsByClassName('c_y')[2].innerHTML = message.userName;
     document.getElementsByClassName('chat_accept')[1].setAttribute('style', 'display:block;');
+    
 }
 function okay_1_1() {
     document.getElementsByClassName('chat_accept')[1].setAttribute('style', 'display: none;');
@@ -69,6 +73,9 @@ function okay_1_1() {
 function set11(id,name){
     document.getElementsByClassName('inner')[0].setAttribute('style', 'display:none;');
     document.getElementsByClassName('conversation')[0].setAttribute('style', 'display:block;');
+
+    document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:none;'); //공유버튼 안보이게
+    document.getElementsByClassName('h_btn')[0].setAttribute('onclick','disableShare()');
     
     document.getElementById('target_video').srcObject = userStreams['meeting'][id];
     document.getElementById('my_video').srcObject = selfStream;
@@ -87,6 +94,9 @@ function end_1_1() {
 
     document.getElementsByClassName('conversation')[0].setAttribute('style', 'display:none;');
     document.getElementsByClassName('inner')[0].setAttribute('style', 'display:block;');
+
+    document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:block;'); //공유버튼 보이게
+    document.getElementsByClassName('h_btn')[0].setAttribute('onclick','shareRequest()');
     
     targetId=null;
     targetName=null;
@@ -108,6 +118,8 @@ function setOther(message) {
         document.getElementById(message.user2Id).innerHTML = "1 : 1 대화 중";
         document.getElementById(message.user2Id).setAttribute('style', 'background:#8f8f8f;');
     }
+    document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:none;'); //공유버튼 안보이게
+    document.getElementsByClassName('h_btn')[0].setAttribute('onclick','disableShare()');
 }
 
 // 대화/요청받음 끝났을 때 나머지 사람들
@@ -126,6 +138,9 @@ function endOther(message) {
         document.getElementById(message.user2Id).innerHTML = "1 : 1 대화신청";
         document.getElementById(message.user2Id).setAttribute('style', 'background:#ffcc00;');
     }
+    document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:block;'); //공유버튼 보이게
+    document.getElementsByClassName('h_btn')[0].setAttribute('onclick','shareRequest()');
+
 }
 
 // 요청 받았을 때 나머지 사람들
@@ -142,3 +157,6 @@ function ingOther(message) {
     }
 }
 
+function disableShare(){
+    alert('1대1 대화중에는 화면공유가 불가능합니다.');
+}

@@ -148,7 +148,7 @@ function meetingOntrackHandler(stream, userName, senderSocketId) { //유저가 �
     //console.log(stream);
 }
 
-function meetingOutOntrackHandler(stream, userName, senderSocketId) {  //사용자가 나갔을때 모든 비디오를 없앤거에 다시 비디오 생성
+function meetingOutOntrackHandler(stream, userName, senderSocketId) {  //사용자가 나갔을때, 모든 비디오를 없앤거에 다시 비디오 생성
     
     if(senderSocketId === 'myId'){
         receiveVideos['meeting'][senderSocketId]=setNewMeetingVideo(userName, senderSocketId === 'myId', (senderSocketId === roomLeader ) || (socket.id === roomLeader), senderSocketId);
