@@ -125,8 +125,8 @@ function setNewMeetingVideo(userName, isLocal, isLeader, socketId){
 
     //if(!isLocal) v_view.appendChild(chat_1_1); // (학생들끼리도 1:1 가능한 버전)
     
-    if(socket.id === roomLeader && !isLocal) v_view.appendChild(chat_1_1);//자기가 리더고 나머지 사람들에 대한 카메라
-    if(socket.id !== roomLeader && isLeader) v_view.appendChild(chat_1_1);//자기는 리더가 아닌데 리더에 대한 카메라
+    if(socket.id === roomLeader && !isLocal) v_view.appendChild(chat_1_1);//자기가 리더고 나머지 사람들에 대한 1대1 요청버튼생성
+    if(socket.id !== roomLeader && isLeader) v_view.appendChild(chat_1_1);//자기는 리더가 아닌데 리더에 대한 1대1 요청버튼생성
     if(isLeader) {  //방장인 경우 M마크 뜨게
         var info_ctxt02 = document.createElement('div');
         var label = document.createElement('div');

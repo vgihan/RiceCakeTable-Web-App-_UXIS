@@ -6,6 +6,8 @@ let talking_stream = {};
 // 1:1 대화하기 버튼 누르면
 function request_1_1(e) {
     if(document.getElementById(e.target.id).innerHTML == "1 : 1 대화신청"){
+        document.getElementById(e.target.id).setAttribute('style', 'background:#fff;');
+        
         socket.emit("request_1_1", {
             socketId: socket.id,
             target: e.target.id,
@@ -13,7 +15,7 @@ function request_1_1(e) {
             roomId: roomId,
             text: document.getElementById(e.target.id).innerHTML
         });
-        
+        document.getElementById(e.target.id).innerHTML = "1 : 1 대화신청 중";
     }
 }
 
@@ -52,9 +54,11 @@ function refusal_1_1() {
 
 // 수락 받음
 function get11Accept(message) {
+    document.getElementById(message.userId).setAttribute('style', 'background:#ffcc00;');
     targetId = message.userId;
     targetName = message.userName;
     set11(targetId,targetName);
+    document.getElementById(targetId).innerHTML = "1 : 1 대화신청"
     
 
 }
@@ -64,6 +68,8 @@ function get11Refusal(message) {
     document.getElementsByClassName('c_y')[2].innerHTML = message.userName;
     document.getElementsByClassName('chat_accept')[1].setAttribute('style', 'display:block;');
     
+    document.getElementById(message.userId).setAttribute('style', 'background:#ffcc00;');
+    document.getElementById(message.userId).innerHTML = "1 : 1 대화신청"
 }
 function okay_1_1() {
     document.getElementsByClassName('chat_accept')[1].setAttribute('style', 'display: none;');
@@ -92,8 +98,8 @@ function end_1_1() {
     document.getElementById('target_video').srcObject = null;
     document.getElementById('my_video').srcObject = null;
 
-    document.getElementsByClassName('conversation')[0].setAttribute('style', 'display:none;');
-    document.getElementsByClassName('inner')[0].setAttribute('style', 'display:block;');
+    document.getElementsByClassName('conversation')[0].setAttribute('style', 'display:none;'); //1대1 화면 안보이게
+    document.getElementsByClassName('inner')[0].setAttribute('style', 'display:block;');  //원래화면 보이게
 
     document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:block;'); //공유버튼 보이게
     document.getElementsByClassName('h_btn')[0].setAttribute('onclick','shareRequest()');

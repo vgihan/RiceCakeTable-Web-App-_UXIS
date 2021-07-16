@@ -519,7 +519,7 @@ io.on('connection', function(socket) {
     socket.on('refusal_1_1', (message) => {
         for(var key in roomList[message.roomId]) {
             if(key === message.target) { // 1:1 건 사람에게
-                io.to(key).emit('refusal_request',{userName: message.userName});
+                io.to(key).emit('refusal_request',{userName: message.userName, userId: message.socketId});
             }
             else if(key !== message.socketId){
                 io.to(key).emit('other_end_request', { // 나머지 사람에게
