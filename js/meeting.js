@@ -58,60 +58,6 @@ function meetingStart(userName, roomId, roomLeader){
 		});
 }
 
-// view에서 비디오 자리 세팅 //이거 안씀
-function setMeetingVideo(userName, isLocal, isLeader, socketId){
-    var video = document.createElement('video');
-    
-    video.className = 'video_' + socketId;
-    video.autoplay = true;
-	video.playsinline = true;
-    
-    var li = document.createElement("li");
-    var v_view = document.createElement("div");
-    var info_ctxt = document.createElement("div");
-    var nicknm = document.createElement("div");
-    var chat_1_1 = document.createElement("div");
-    var div = document.createElement("div");
-    var a = document.createElement("a");
-
-    a.tabIndex = "0";
-    a.innerHTML = "1 : 1 대화신청";
-    a.onclick = request_1_1;
-    
-    a.id = socketId;
-    chat_1_1.className = "chat_1_1";
-    nicknm.className = "nicknm";
-    info_ctxt.className = "info_ctxt";
-    v_view.className = "v_view";
-    
-    li.className = socketId;
-
-    nicknm.innerHTML = userName;
-
-    var container = document.getElementsByClassName('slick-slide slick-current slick-active')[0];
-    //var container = document.getElementsByClassName('slick-slide')[1];
-    div.appendChild(a);
-    chat_1_1.appendChild(div);
-    info_ctxt.appendChild(nicknm);
-    v_view.appendChild(video);
-    v_view.appendChild(info_ctxt);
-    li.appendChild(v_view);
-    container.appendChild(li);
-
-    if(!isLocal) v_view.appendChild(chat_1_1); //자신의 비디오가 아닌경우 1대1요청 뜨게
-    if(isLeader) {  //방장인 경우 M마크 뜨게
-        var info_ctxt02 = document.createElement('div');
-        var label = document.createElement('div');
-        info_ctxt02.className = 'info_ctxt02';
-        label.className = 'label';
-        label.innerHTML = 'M';
-        info_ctxt02.appendChild(label);
-        v_view.appendChild(info_ctxt02);
-    }
-
-    return video;
-}
-
 //비디오를 6명씩 잘라서 넣음
 function setNewMeetingVideo(userName, isLocal, isLeader, socketId){
     var video = document.createElement('video');
@@ -177,7 +123,10 @@ function setNewMeetingVideo(userName, isLocal, isLeader, socketId){
     li.appendChild(v_view);
     container.appendChild(li);
 
-    if(!isLocal) v_view.appendChild(chat_1_1); //자신의 비디오가 아닌경우 1대1요청 뜨게
+    //if(!isLocal) v_view.appendChild(chat_1_1); // (학생들끼리도 1:1 가능한 버전)
+    
+    if(socket.id === roomLeader && !isLocal) v_view.appendChild(chat_1_1);//자기가 리더고 나머지 사람들에 대한 카메라
+    if(socket.id !== roomLeader && isLeader) v_view.appendChild(chat_1_1);//자기는 리더가 아닌데 리더에 대한 카메라
     if(isLeader) {  //방장인 경우 M마크 뜨게
         var info_ctxt02 = document.createElement('div');
         var label = document.createElement('div');
