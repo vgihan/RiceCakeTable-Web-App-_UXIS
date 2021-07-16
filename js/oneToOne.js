@@ -120,9 +120,15 @@ function setOther(message) {
         document.getElementById(message.user1Id).innerHTML = "1 : 1 대화 중";
         document.getElementById(message.user1Id).setAttribute('style', 'background:#8f8f8f;');
     }
+    else{
+        makeChat_1_1(message.user1Id);
+    }
     if(message.user2Id == roomLeader) {
         document.getElementById(message.user2Id).innerHTML = "1 : 1 대화 중";
         document.getElementById(message.user2Id).setAttribute('style', 'background:#8f8f8f;');
+    }
+    else{
+        makeChat_1_1(message.user2Id);
     }
     document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:none;'); //공유버튼 안보이게
     document.getElementsByClassName('h_btn')[0].setAttribute('onclick','disableShare()');
@@ -140,9 +146,15 @@ function endOther(message) {
         document.getElementById(message.user1Id).innerHTML = "1 : 1 대화신청";
         document.getElementById(message.user1Id).setAttribute('style', 'background:#ffcc00;');
     }
+    else{
+        deleteChat_1_1(message.user1Id);
+    }
     if(message.user2Id == roomLeader) {
         document.getElementById(message.user2Id).innerHTML = "1 : 1 대화신청";
         document.getElementById(message.user2Id).setAttribute('style', 'background:#ffcc00;');
+    }
+    else{
+        deleteChat_1_1(message.user2Id);
     }
     document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:block;'); //공유버튼 보이게
     document.getElementsByClassName('h_btn')[0].setAttribute('onclick','shareRequest()');
@@ -165,4 +177,24 @@ function ingOther(message) {
 
 function disableShare(){
     alert('1대1 대화중에는 화면공유가 불가능합니다.');
+}
+
+function makeChat_1_1(id){
+    var chat= document.createElement('div');
+    chat.className='chat_1_1';
+    var chat_div= document.createElement('div');
+    var chat_a= document.createElement('a');
+    chat_a.setAttribute('tabindex','0');
+    chat_a.setAttribute('id',id);
+    chat_a.innerHTML='1 : 1 대화 중';
+    chat_a.style="background:#8f8f8f";
+    
+    chat_div.appendChild(chat_a);
+    chat.appendChild(chat_div);
+    $(`.${id} .v_view`).append(chat);
+    //onsole.log('id:');
+}
+
+function deleteChat_1_1(id){
+    $(`.${id} .v_view .chat_1_1`).remove()
 }
