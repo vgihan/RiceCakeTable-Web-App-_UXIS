@@ -1,5 +1,5 @@
-//const socket = io('https://betterteaching.xyz', {secure: true});
-const socket = io('https://localhost', {secure: true});
+const socket = io('https://betterteaching.xyz', {secure: true});
+//const socket = io('https://localhost', {secure: true});
 
 const pc_config = {
     iceServers: [
