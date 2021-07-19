@@ -106,9 +106,6 @@
 					<div class="view_all">
 						<div>
 							<video id="target_video" autoplay=true playsinline=true></video>
-							<!--<div class="info_ctxt">
-								<div class="target_nicknm"></div>
-							</div>-->
 						</div>
 					</div>
 					
@@ -117,6 +114,7 @@
 						<p>1 : 1 대화 중</p>
 						<p>입니다</p>
 						<a onclick="end_1_1();">종료하기</a> <!--1개 띄우고 3개 없애기-->
+						<a onclick="mute_1_1();" id="mute">소리켜기</a>
 					</div>
 
 					<div class="view_lbox">
@@ -127,8 +125,6 @@
 						</div>
 					</div>
 				</div>
-				<!--#11-->
-
 			</div>		
 
 			<!--footer : s -->
@@ -162,7 +158,6 @@
 			</div>
 			<!--menu open : e-->
 
-			<!--#11-->
 			<div class="chat_accept" style="display: none;">
 				<div class="inner">
 					<div class="ca_box">						
