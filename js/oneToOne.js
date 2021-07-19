@@ -1,13 +1,12 @@
-let targetId;
-let targetName;
+let targetId = null;
+let targetName = null;
 
-let talking_stream = {};
+//let talking_stream = {};
+let mute_list = [];
 
 // 1:1 대화하기 버튼 누르면
 function request_1_1(e) {
     if(document.getElementById(e.target.id).innerHTML == "1 : 1 대화신청"){
-        document.getElementById(e.target.id).setAttribute('style', 'background:#fff;');
-        
         socket.emit("request_1_1", {
             socketId: socket.id,
             target: e.target.id,
@@ -15,7 +14,6 @@ function request_1_1(e) {
             roomId: roomId,
             text: document.getElementById(e.target.id).innerHTML
         });
-        document.getElementById(e.target.id).innerHTML = "1 : 1 대화신청 중";
     }
 }
 
@@ -54,22 +52,15 @@ function refusal_1_1() {
 
 // 수락 받음
 function get11Accept(message) {
-    document.getElementById(message.userId).setAttribute('style', 'background:#ffcc00;');
     targetId = message.userId;
     targetName = message.userName;
     set11(targetId,targetName);
-    document.getElementById(targetId).innerHTML = "1 : 1 대화신청"
-    
-
 }
 
 // 거절 받음
 function get11Refusal(message) {
     document.getElementsByClassName('c_y')[2].innerHTML = message.userName;
     document.getElementsByClassName('chat_accept')[1].setAttribute('style', 'display:block;');
-    
-    document.getElementById(message.userId).setAttribute('style', 'background:#ffcc00;');
-    document.getElementById(message.userId).innerHTML = "1 : 1 대화신청"
 }
 function okay_1_1() {
     document.getElementsByClassName('chat_accept')[1].setAttribute('style', 'display: none;');
@@ -79,12 +70,22 @@ function okay_1_1() {
 function set11(id,name){
     document.getElementsByClassName('inner')[0].setAttribute('style', 'display:none;');
     document.getElementsByClassName('conversation')[0].setAttribute('style', 'display:block;');
-
-    document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:none;'); //공유버튼 안보이게
-    document.getElementsByClassName('h_btn')[0].setAttribute('onclick','disableShare()');
     
+    document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:none;'); //공유버튼 안 보이게
+    document.getElementsByClassName('h_btn')[0].setAttribute('onclick','disableShare()');
+
     document.getElementById('target_video').srcObject = userStreams['meeting'][id];
     document.getElementById('my_video').srcObject = selfStream;
+
+    socket.emit('mute_list', {
+        socketId: socket.id,
+        target: targetId,
+        roomId: roomId
+    });
+    
+    // userStreams['meeting'][id].getAudioTracks()[0].enabled=false; //지워야 댐
+    console.log('mute_list',mute_list);
+
 }
 
 // 1:1 종료
@@ -95,17 +96,25 @@ function end_1_1() {
         roomId: roomId
     });
 
+    get11End();
+}
+
+function get11End() {
+    unmute();
+    // userStreams['meeting'][targetId].getAudioTracks()[0].enabled=true;
+
     document.getElementById('target_video').srcObject = null;
     document.getElementById('my_video').srcObject = null;
 
-    document.getElementsByClassName('conversation')[0].setAttribute('style', 'display:none;'); //1대1 화면 안보이게
-    document.getElementsByClassName('inner')[0].setAttribute('style', 'display:block;');  //원래화면 보이게
-
     document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:block;'); //공유버튼 보이게
     document.getElementsByClassName('h_btn')[0].setAttribute('onclick','shareRequest()');
-    
+
+    document.getElementsByClassName('conversation')[0].setAttribute('style', 'display:none;');
+    document.getElementsByClassName('inner')[0].setAttribute('style', 'display:block;');
+
     targetId=null;
     targetName=null;
+    mute_list=[];
 }
 
 // 수락 받았을 때 나머지 사람들
@@ -132,6 +141,9 @@ function setOther(message) {
     }
     document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:none;'); //공유버튼 안보이게
     document.getElementsByClassName('h_btn')[0].setAttribute('onclick','disableShare()');
+
+    oneoneUserId1 = message.user1Id;
+    oneoneUserId2 = message.user2Id;
 }
 
 // 대화/요청받음 끝났을 때 나머지 사람들
@@ -159,6 +171,9 @@ function endOther(message) {
     document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:block;'); //공유버튼 보이게
     document.getElementsByClassName('h_btn')[0].setAttribute('onclick','shareRequest()');
 
+    //11conversation
+    oneoneUserId1 = null;
+    oneoneUserId2 = null;
 }
 
 // 요청 받았을 때 나머지 사람들
@@ -166,13 +181,84 @@ function ingOther(message) {
     // document.getElementById(message.user1Id).innerHTML = "1 : 1 요청 중";
     // document.getElementById(message.user2Id).innerHTML = "1 : 1 요청받음";
     if(message.user1Id == roomLeader) {
-        document.getElementById(message.user1Id).innerHTML = "1 : 1 요청받음";
+        document.getElementById(message.user1Id).innerHTML = "1 : 1 요청 중";
         document.getElementById(message.user1Id).setAttribute('style', 'background:#8f8f8f;');
     }
     if(message.user2Id == roomLeader) {
         document.getElementById(message.user2Id).innerHTML = "1 : 1 요청받음";
         document.getElementById(message.user2Id).setAttribute('style', 'background:#8f8f8f;');
     }
+}
+
+// mute 해야 할 사람 저장
+function get11MuteList(message) {
+    for(var i=0; i < message.others.length; i++) {
+        mute_list.push(message.others[i]);
+    }
+    mute();
+}
+
+// 소리 버튼 누르면
+function mute_1_1() {
+    if (document.getElementById('mute').innerHTML == "소리켜기") {
+        document.getElementById('mute').innerHTML = "소리끄기"
+        unmute();
+    }
+    else if (document.getElementById('mute').innerHTML == "소리끄기") {
+        document.getElementById('mute').innerHTML = "소리켜기"
+        mute();
+    }
+}
+
+function unmute() {
+    for(var i=0; i < mute_list.length; i++) {
+        key = mute_list[i];
+        userStreams['meeting'][key].getAudioTracks()[0].enabled=true;
+    }
+}
+
+function mute() {
+    for(var i=0; i < mute_list.length; i++) {
+        key = mute_list[i];
+        userStreams['meeting'][key].getAudioTracks()[0].enabled=false;
+    }
+}
+
+function check_exit_1_1(socketId) { // 내가 1:1 하던 중, 누군가 나갔을 때
+    if(mute_list.length!==0)
+    {
+        if(socketId==targetId) get11End();
+        else {
+            var temp_list = [];
+            for(var i=0; i < mute_list.length; i++) {
+                if(socketId !== mute_list[i]) temp_list.push(mute_list[i]);
+            }
+            mute_list = temp_list;
+        }
+    }
+    console.log(socketId,"exit : ",mute_list);
+}
+
+function check_enter_1_1(socketId) { // 내가 1:1 하던 중, 누군가 들어왔을 때
+    if(targetId!==null) {
+        mute_list.push(socketId);
+        if(document.getElementById('mute').innerHTML == "소리켜기") userStreams['meeting'][socketId].getAudioTracks()[0].enabled=false;
+        if(document.getElementById('mute').innerHTML == "소리끄기") userStreams['meeting'][socketId].getAudioTracks()[0].enabled=true;
+    }
+    console.log(socketId,"enter : ",mute_list);
+}
+
+function setOther_come(id) {
+    receiveVideos['meeting'][id].srcObject = null;
+    if(id == roomLeader) {
+        document.getElementById(id).innerHTML = "1 : 1 대화 중";
+        document.getElementById(id).setAttribute('style', 'background:#8f8f8f;');
+    }
+    else {
+        makeChat_1_1(id);
+    }
+    document.getElementsByClassName('cc_btn')[1].setAttribute('style', 'display:none;'); //공유버튼 안보이게
+    document.getElementsByClassName('h_btn')[0].setAttribute('onclick','disableShare()');
 }
 
 function disableShare(){
