@@ -144,7 +144,9 @@ function meetingOntrackHandler(stream, userName, senderSocketId) { //유저가 �
     if(receiveVideos['meeting'][senderSocketId]) return;
     userStreams['meeting'][senderSocketId] = stream;
     receiveVideos['meeting'][senderSocketId] = setNewMeetingVideo(userName, false, senderSocketId === roomLeader, senderSocketId);
-    receiveVideos['meeting'][senderSocketId].srcObject = stream;
+    console.log('1:1 =',oneoneUserId1,'-',oneoneUserId2);
+    if(senderSocketId == oneoneUserId1 || senderSocketId ==oneoneUserId2) setOther_come(senderSocketId);
+    else receiveVideos['meeting'][senderSocketId].srcObject = stream;
     //console.log(stream);
 }
 
@@ -157,12 +159,16 @@ function meetingOutOntrackHandler(stream, userName, senderSocketId) {  //사용�
     else{
         receiveVideos['meeting'][senderSocketId]=setNewMeetingVideo(userName, senderSocketId === 'myId', (senderSocketId === roomLeader ), senderSocketId);
     }
-    receiveVideos['meeting'][senderSocketId].srcObject = stream;
+    if(senderSocketId == oneoneUserId1 || senderSocketId ==oneoneUserId2) setOther_come(senderSocketId);
+    else receiveVideos['meeting'][senderSocketId].srcObject = stream;
     //console.log(stream);
 }
 
 async function meetingAllUsersHandler(message) {   //자신을 제외한 모든 유저의 receiverPc생성, 비디오 생성(처음 접속했을 때 한번만)
     try {
+	oneoneUserId1 = message.user1Id;
+        oneoneUserId2 = message.user2Id;    
+	    
         let len = message.users.length;
 
         for(let i=0; i<len; i++) {
@@ -203,6 +209,9 @@ async function meetingUserEnterHandler(message) {   //누군가 들어왔을 때
 
         document.getElementsByClassName('c_r')[0].innerHTML = ++numOfUsers + '명';
         document.getElementById('num_user_span').innerHTML = numOfUsers + '명';
+	    
+	check_enter_1_1(message.socketId);    
+	    
     } catch (error) {
         console.error(error);
     }
@@ -231,6 +240,8 @@ function meetingUserExitHandler(message) {  //누군가 나갔을 때
         meetingOutOntrackHandler(userStreams['meeting'][id], userName, id)
 
     }
+	
+    check_exit_1_1(socketId);
 }
 
 //no back
