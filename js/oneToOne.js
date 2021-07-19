@@ -85,6 +85,9 @@ function set11(id,name){
     
     // userStreams['meeting'][id].getAudioTracks()[0].enabled=false; //지워야 댐
     console.log('mute_list',mute_list);
+    
+    oneoneUserId1 = socket.id;
+    oneoneUserId2 = targetId;
 
 }
 
@@ -115,6 +118,9 @@ function get11End() {
     targetId=null;
     targetName=null;
     mute_list=[];
+    
+    oneoneUserId1 = null;
+    oneoneUserId2 = null;
 }
 
 // 수락 받았을 때 나머지 사람들
@@ -283,4 +289,9 @@ function makeChat_1_1(id){
 
 function deleteChat_1_1(id){
     $(`.${id} .v_view .chat_1_1`).remove()
+}
+
+function get11MuteCome(id){
+    if(document.getElementById('mute').innerHTML == "소리켜기") { userStreams['meeting'][id].getAudioTracks()[0].enabled=false; console.log(id,"off"); }
+    if(document.getElementById('mute').innerHTML == "소리끄기") { userStreams['meeting'][id].getAudioTracks()[0].enabled=true; console.log(id,"off"); }
 }
