@@ -59,6 +59,9 @@ let numOfUsers = {};
 let shareSwitch = {};  //해당 room이 true이면 현재 화면공유중
 let shareUserId={};   //해당 room의 화면공유자의 id를 가짐
 
+let oneoneUserId1 = null;
+let oneoneUserId2 = null;
+
 //-------------------------------------------------------------------------------------
 
 app.get('/', (request, response) => {
@@ -514,12 +517,14 @@ io.on('connection', function(socket) {
                 });
             }
         }
-    })
+        oneoneUserId1 = message.socketId; //11conversation
+        oneoneUserId2 = message.target; //11conversation
+    });
 	
     socket.on('refusal_1_1', (message) => {
         for(var key in roomList[message.roomId]) {
             if(key === message.target) { // 1:1 건 사람에게
-                io.to(key).emit('refusal_request',{userName: message.userName, userId: message.socketId});
+                io.to(key).emit('refusal_request',{userName: message.userName});
             }
             else if(key !== message.socketId){
                 io.to(key).emit('other_end_request', { // 나머지 사람에게
@@ -528,7 +533,7 @@ io.on('connection', function(socket) {
                 });
             }
         }
-    })
+    });
 
     socket.on('end_1_1', (message) => {
         for(var key in roomList[message.roomId]) {
@@ -542,7 +547,20 @@ io.on('connection', function(socket) {
                 });
             }
         }
-    })
+        oneoneUserId2 = null; //11conversation
+        oneoneUserId1 = null; //11conversation
+    });
+
+    socket.on("mute_list", (message) => {
+        var others = [];
+        for(var key in roomList[message.roomId]) {
+            if(key !== message.target && key !== message.socketId) { // 대화 상대방에게
+                others.push(key);
+            }
+        }
+        console.log(others);
+        socket.emit("mute_list_request", {others : others});
+    });
 
     //화면 공유
     // socket.on('display_share', (message) => {
@@ -763,6 +781,8 @@ function meetingJoinRoomHandler(message, socket) {
         if(rows.length !== 0) {
             io.to(message.senderSocketId).emit("all_users", { 
                 users: rows,
+                user1Id: oneoneUserId1,
+                user2Id: oneoneUserId2
             });
         }
         socket.join(message.roomId);
