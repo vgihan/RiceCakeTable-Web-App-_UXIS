@@ -148,6 +148,9 @@ function meetingOntrackHandler(stream, userName, senderSocketId) { //유저가 �
     if(senderSocketId == oneoneUserId1 || senderSocketId ==oneoneUserId2) setOther_come(senderSocketId);
     else receiveVideos['meeting'][senderSocketId].srcObject = stream;
     //console.log(stream);
+    if(socket.id == oneoneUserId1 || socket.id == oneoneUserId2) {
+	    get11MuteCome(senderSocketId);
+    }
 }
 
 function meetingOutOntrackHandler(stream, userName, senderSocketId) {  //사용자가 나갔을때, 모든 비디오를 없앤거에 다시 비디오 생성
@@ -163,9 +166,6 @@ function meetingOutOntrackHandler(stream, userName, senderSocketId) {  //사용�
     else receiveVideos['meeting'][senderSocketId].srcObject = stream;
     //console.log(stream);
 	
-    if(socket.id == oneoneUserId1 || socket.id == oneoneUserId2) {
-        get11MuteCome(senderSocketId);
-    }
 }
 
 async function meetingAllUsersHandler(message) {   //자신을 제외한 모든 유저의 receiverPc생성, 비디오 생성(처음 접속했을 때 한번만)

@@ -104,7 +104,11 @@ function end_1_1() {
 
 function get11End() {
     unmute();
-    // userStreams['meeting'][targetId].getAudioTracks()[0].enabled=true;
+    if(targetId == roomLeader) {
+    	receiveVideos['meeting'][targetId].srcObject = userStreams['meeting'][targetId];
+    	document.getElementById(targetId).innerHTML = "1:1 대화신청";
+    	document.getElementById(targetId).setAttribute('style','background:#ffcc00;');
+    }
 
     document.getElementById('target_video').srcObject = null;
     document.getElementById('my_video').srcObject = null;
@@ -247,9 +251,7 @@ function check_exit_1_1(socketId) { // 내가 1:1 하던 중, 누군가 나갔�
 
 function check_enter_1_1(socketId) { // 내가 1:1 하던 중, 누군가 들어왔을 때
     if(targetId!==null) {
-        mute_list.push(socketId);
-        if(document.getElementById('mute').innerHTML == "소리켜기") userStreams['meeting'][socketId].getAudioTracks()[0].enabled=false;
-        if(document.getElementById('mute').innerHTML == "소리끄기") userStreams['meeting'][socketId].getAudioTracks()[0].enabled=true;
+        mute_list.push(socketId); 
     }
     console.log(socketId,"enter : ",mute_list);
 }
