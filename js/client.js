@@ -48,6 +48,10 @@ let numOfUsers; //방 접속 인원 수
 let roomTime;   //
 let shareSwitch = false;   //화면 공유 스위치 (방 당 1명 밖에 공유 못함)
 let shareSocketId;
+
+let oneoneUserId1 = null;
+let oneoneUserId2 = null;
+
 //----------------------------------------------------------------------------------------
 function show(purpose){
     console.log('sendPC',sendPC);
@@ -302,7 +306,6 @@ socket.on("share_disconnect", () => {
 socket.on("share_possible", () => {
     shareStart();
 });
-
 socket.on("get_1_1_request", (message) => {
     get11Request(message);
 });
@@ -328,5 +331,13 @@ socket.on("other_ing_request", (message) => {
 });
 
 socket.on("end_request", () => {
-    end_1_1();
+    get11End();
+});
+
+socket.on("mute_list_request", (message) => {
+    get11MuteList(message);
+});
+
+socket.on("other_come_request", (message) => {
+    setOther(message);
 });
