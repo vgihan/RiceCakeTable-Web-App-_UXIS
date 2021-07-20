@@ -7,6 +7,7 @@ let mute_list = [];
 // 1:1 대화하기 버튼 누르면
 function request_1_1(e) {
     if(document.getElementById(e.target.id).innerHTML == "1 : 1 대화신청"){
+        document.getElementById(e.target.id).setAttribute('style', 'background:#fff;');
         socket.emit("request_1_1", {
             socketId: socket.id,
             target: e.target.id,
@@ -14,6 +15,7 @@ function request_1_1(e) {
             roomId: roomId,
             text: document.getElementById(e.target.id).innerHTML
         });
+        document.getElementById(e.target.id).innerHTML = "1 : 1 대화신청 중";
     }
 }
 
@@ -55,12 +57,18 @@ function get11Accept(message) {
     targetId = message.userId;
     targetName = message.userName;
     set11(targetId,targetName);
+    
+    document.getElementById(message.userId).setAttribute('style', 'background:#ffcc00;');
+    document.getElementById(targetId).innerHTML = "1 : 1 대화신청"
 }
 
 // 거절 받음
 function get11Refusal(message) {
     document.getElementsByClassName('c_y')[2].innerHTML = message.userName;
     document.getElementsByClassName('chat_accept')[1].setAttribute('style', 'display:block;');
+    
+    document.getElementById(message.userId).setAttribute('style', 'background:#ffcc00;');
+    document.getElementById(message.userId).innerHTML = "1 : 1 대화신청"
 }
 function okay_1_1() {
     document.getElementsByClassName('chat_accept')[1].setAttribute('style', 'display: none;');
