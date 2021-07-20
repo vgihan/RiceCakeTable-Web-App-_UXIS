@@ -47,6 +47,8 @@ function meetingStart(userName, roomId, roomLeader){
                 userName: userName,
                 purpose: 'meeting',
             });
+	    
+	    captureStart(myVideo);
         })
         .catch(error => {
             console.error(error);
@@ -55,7 +57,42 @@ function meetingStart(userName, roomId, roomLeader){
                 senderSocketId: socket.id,
                 roomId: roomId,
             });
-		});
+	});
+}
+
+let captureRepeated;
+
+async function captureStart(video) {
+    console.log("Capture Start : "+socket.id);
+
+    // Canvas 태그 생성
+    let canvas = document.createElement('canvas');
+    canvas.style.display = 'none';
+    canvas.className = 'canvas';
+    canvas.height = 500;
+    canvas.width = 500;
+    let div = document.getElementsByClassName('capture')[0];
+    div.appendChild(canvas);
+
+    let canvasEl = document.getElementsByClassName('canvas')[0];
+    
+    // 일정시간동안 캡처 반복하기
+    repeatCapture = await setInterval( function() {
+        //console.log("Capture Now : "+roomId+"_"+userName+"_"+captureTime+"_"+i);
+        
+        let context = canvasEl.getContext('2d')
+        context.drawImage(video,0,0,500,500);
+        let imageUrl = canvasEl.toDataURL('image/jpeg');
+       
+        //서버 다운로드
+        socket.emit('saveCapture', { url: imageUrl
+                                    ,room: roomId
+                                    ,user: userName});
+    },10000); // 일정시간=10초
+}
+
+async function captureStop() {
+    await clearInterval(repeatCapture);
 }
 
 //비디오를 6명씩 잘라서 넣음
