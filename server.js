@@ -59,8 +59,7 @@ let numOfUsers = {};
 let shareSwitch = {};  //해당 room이 true이면 현재 화면공유중
 let shareUserId={};   //해당 room의 화면공유자의 id를 가짐
 
-let oneoneUserId1 = null;
-let oneoneUserId2 = null;
+let oneoneUserId = {}
 
 //-------------------------------------------------------------------------------------
 
@@ -517,8 +516,9 @@ io.on('connection', function(socket) {
                 });
             }
         }
-        oneoneUserId1 = message.socketId; //11conversation
-        oneoneUserId2 = message.target; //11conversation
+        if (socket.id == rooms[message.roomId]['room_leader']) oneoneUserId[message.roomId] = message.target
+        else oneoneUserId[message.roomId] = socket.id
+    
     });
 	
     socket.on('refusal_1_1', (message) => {
@@ -547,8 +547,7 @@ io.on('connection', function(socket) {
                 });
             }
         }
-        oneoneUserId2 = null; //11conversation
-        oneoneUserId1 = null; //11conversation
+        oneoneUserId[message.roomId]=null;
     });
 
     socket.on("mute_list", (message) => {
@@ -781,8 +780,7 @@ function meetingJoinRoomHandler(message, socket) {
         if(rows.length !== 0) {
             io.to(message.senderSocketId).emit("all_users", { 
                 users: rows,
-                user1Id: oneoneUserId1,
-                user2Id: oneoneUserId2
+                oneoneUserId: oneoneUserId[message.roomId]
             });
         }
         socket.join(message.roomId);
