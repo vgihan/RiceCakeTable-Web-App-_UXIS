@@ -61,6 +61,17 @@ let shareUserId={};   //해당 room의 화면공유자의 id를 가짐
 
 let oneoneUserId = {}
 
+fs.readdir(__dirname+"/uploads", function(error, filelist){
+    try {
+        for(var i=0; i<filelist.length; i++){
+            delete_directory(__dirname+'/uploads/'+filelist[i]);
+        }
+        console.log("delete",filelist.length,"files in uploads");
+    }catch(error) {
+        console.log(error);
+    }       
+})
+
 //-------------------------------------------------------------------------------------
 
 app.get('/', (request, response) => {
@@ -363,11 +374,12 @@ io.on('connection', function(socket) {
                 delete rooms[roomId];
                 delete roomList[roomId];
                 delete numOfUsers[roomId];
+		delete oneoneUserId[roomId];
             }
 
             if(roomList[roomId]===undefined){
                 delete roomToTime[roomId];
-		        delete_directory(__dirname+'/uploads/'+roomId); //file upload
+		delete_directory(__dirname+'/uploads/'+roomId); //file upload
             }
         } catch (error) {
             console.error(error);
