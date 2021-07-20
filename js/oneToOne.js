@@ -111,10 +111,11 @@ function end_1_1() {
 }
 
 function get11End() {
+    if(document.getElementById('mute').innerHTML == "소리끄기") document.getElementById('mute').innerHTML = "소리켜기";
     unmute();
     if(targetId == roomLeader) {
     	receiveVideos['meeting'][targetId].srcObject = userStreams['meeting'][targetId];
-    	document.getElementById(targetId).innerHTML = "1:1 대화신청";
+    	document.getElementById(targetId).innerHTML = "1 : 1 대화신청";
     	document.getElementById(targetId).setAttribute('style','background:#ffcc00;');
     }
 
