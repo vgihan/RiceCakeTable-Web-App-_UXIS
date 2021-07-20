@@ -170,8 +170,10 @@ function meetingOutOntrackHandler(stream, userName, senderSocketId) {  //사용�
 
 async function meetingAllUsersHandler(message) {   //자신을 제외한 모든 유저의 receiverPc생성, 비디오 생성(처음 접속했을 때 한번만)
     try {
-	oneoneUserId1 = message.user1Id;
-        oneoneUserId2 = message.user2Id;    
+	if(message.oneoneUserId){
+            oneoneUserId1 = message.oneoneUserId;
+            oneoneUserId2 = roomLeader;
+        }    
 	    
         let len = message.users.length;
 
