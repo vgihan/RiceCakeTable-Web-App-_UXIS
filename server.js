@@ -640,6 +640,26 @@ io.on('connection', function(socket) {
         //shareSwitch[users[socket.id]['room_id']] = true;       //여기서 해주려다가 공유를 취소해도 true가 되는 에러를 방지하기위해 sender_offer로 옮김
         //shareUserId[users[socket.id]['room_id']]=socket.id;
     });
+	
+    socket.on('saveCapture',function(data) {
+        //console.log("Server Received Capture Image : "+data);
+        
+        let today = new Date();
+        let hour = today.getHours();
+        let minute = today.getMinutes();
+        let second = today.getSeconds();
+        let captureTime = hour+"시"+minute+"분"+second+"초";
+        let path = "./captures/"+data.room
+
+        if(!fs.existsSync(path)) fs.mkdirSync(path);
+        
+        let filename = path+'/'+data.user+'_'+captureTime+'.jpg';
+        let url = data.url.replace('data:image/jpeg;base64,','');
+
+        fs.writeFile(filename,url,'base64',function(error) {
+            console.log(error);
+        });
+    });
 });
 
 function createSenderPeerConnection(receiverSocketId, senderSocketId, stream, purpose) {
