@@ -19,6 +19,7 @@ $(function(){
 		$('.chatbox').slideToggle();	
 		if (self.hasClass("off")) {
 			self.removeClass("off").addClass("on");
+			scrollDown();
 		} else {
             self.removeClass("on").addClass("off");
         }
