@@ -54,6 +54,8 @@ function meetingStart(userName, roomId, roomLeader){
             socket.emit("join_room", {
                 senderSocketId: socket.id,
                 roomId: roomId,
+		userName: userName,
+                purpose: 'meeting',
             });
 		});
 }
