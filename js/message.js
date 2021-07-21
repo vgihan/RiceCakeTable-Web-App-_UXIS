@@ -30,16 +30,19 @@ function send_msg() {
         console.log("message:",message)
         socket.emit('message', {type: 'message', message: message, roomId : roomId, userName : userName, roomTime:roomTime})
         
+        scrollDown();
         
-        var chat_scroll = document.getElementById('mCSB_1_container');  //스크롤 밑으로 내리기
-        //console.log("scroll height:",chat_scroll.scrollHeight)
-        if(chat_scroll.scrollHeight>460){
-            var scroll_down= -(chat_scroll.scrollHeight -470)
-            chat_scroll.style.top = `${scroll_down}px`
-        }
-        //console.log("chat height:",chat_scroll.style.top)
     }
     
+}
+function scrollDown(){
+    var chat_scroll = document.getElementById('mCSB_1_container');  //스크롤 밑으로 내리기
+    //console.log("scroll height:",chat_scroll.scrollHeight)
+    if(chat_scroll.scrollHeight>460){
+        var scroll_down= -(chat_scroll.scrollHeight -470)
+        chat_scroll.style.top = `${scroll_down}px`
+    }
+    //console.log("chat height:",chat_scroll.style.top)
 }
 
 function enterkey() { 
@@ -53,13 +56,8 @@ function enterkey() {
 function update(data) {
     const chat_inner = document.getElementById('chat_inners');
     chat_inner.innerHTML += `<li><h1>${data.userName}</h1><p>${data.message}</p></li>`
-    var chat_scroll = document.getElementById('mCSB_1_container');  //스크롤 밑으로 내리기
-    //console.log("scroll height:",chat_scroll.scrollHeight)
-    if(chat_scroll.scrollHeight>460){
-        var scroll_down= -(chat_scroll.scrollHeight -470)
-        chat_scroll.style.top = `${scroll_down}px`
-    }
-    //console.log("chat height:",chat_scroll.style.top)
+    
+    scrollDown();
 }
 
 function getChat(data) {
@@ -70,9 +68,5 @@ function getChat(data) {
         chat_inner.innerHTML += `<li><h1>${data[i].userName}</h1><p>${data[i].msg}</p></li>`
     }
 
-    var chat_scroll = document.getElementById('mCSB_1_container');  //스크롤 밑으로 내리기
-    if(chat_scroll.scrollHeight>460){
-        var scroll_down= -(chat_scroll.scrollHeight -470)
-        chat_scroll.style.top = `${scroll_down}px`
-    }
+    scrollDown();
 }
