@@ -48,14 +48,23 @@ function meetingStart(userName, roomId, roomLeader){
                 purpose: 'meeting',
             });
         })
-        .catch(error => {
+        .catch(error => { //noCam인 경우
             console.error(error);
-        		
+            const myVideo = setNewMeetingVideo(userName, true, socket.id === roomLeader, socket.id);
+        	userStreams['meeting']['myId'] = null;
+            receiveVideos['meeting']['myId'] = myVideo
+            receiveVideos['meeting']['myId'].srcObject = null;
+            usersName['myId']=userName;
+
             socket.emit("join_room", {
                 senderSocketId: socket.id,
                 roomId: roomId,
-		userName: userName,
+                userName: userName,
                 purpose: 'meeting',
+            });
+            socket.emit('noCam',{
+                roomId:roomId,
+                userName:userName
             });
 		});
 }
@@ -146,7 +155,7 @@ function meetingOntrackHandler(stream, userName, senderSocketId) { //유저가 �
     if(receiveVideos['meeting'][senderSocketId]) return;
     userStreams['meeting'][senderSocketId] = stream;
     receiveVideos['meeting'][senderSocketId] = setNewMeetingVideo(userName, false, senderSocketId === roomLeader, senderSocketId);
-    console.log('1:1 =',oneoneUserId1,'-',oneoneUserId2);
+    //console.log('1:1 =',oneoneUserId1,'-',oneoneUserId2);
     if(senderSocketId == oneoneUserId1 || senderSocketId ==oneoneUserId2) setOther_come(senderSocketId);
     else receiveVideos['meeting'][senderSocketId].srcObject = stream;
     //console.log(stream);
@@ -159,7 +168,6 @@ function meetingOutOntrackHandler(stream, userName, senderSocketId) {  //사용�
     
     if(senderSocketId === 'myId'){
         receiveVideos['meeting'][senderSocketId]=setNewMeetingVideo(userName, senderSocketId === 'myId', (senderSocketId === roomLeader ) || (socket.id === roomLeader), senderSocketId);
-        
     }
     else{
         receiveVideos['meeting'][senderSocketId]=setNewMeetingVideo(userName, senderSocketId === 'myId', (senderSocketId === roomLeader ), senderSocketId);
@@ -172,7 +180,7 @@ function meetingOutOntrackHandler(stream, userName, senderSocketId) {  //사용�
 
 async function meetingAllUsersHandler(message) {   //자신을 제외한 모든 유저의 receiverPc생성, 비디오 생성(처음 접속했을 때 한번만)
     try {
-	if(message.oneoneUserId){
+	    if(message.oneoneUserId){
             oneoneUserId1 = message.oneoneUserId;
             oneoneUserId2 = roomLeader;
         }    
@@ -182,19 +190,28 @@ async function meetingAllUsersHandler(message) {   //자신을 제외한 모든 
         for(let i=0; i<len; i++) {
             var socketId = message.users[i].socket_id;
             var userName = message.users[i].user_name;
-    
-            usersName[socketId]=userName;
-            let pc = createReceiverPeerConnection(socketId, userName, 'meeting', meetingOntrackHandler);
-            let offer = await createReceiverOffer(pc);
-            setTimeout(500);
-            receivePCs['meeting'][socketId] = pc;
-    
-            await socket.emit("receiver_offer", {
-                offer,
-                receiverSocketId: socket.id,
-                senderSocketId: socketId,
-                purpose: 'meeting',
-            });	
+            var stream = message.users[i].stream;
+            
+            if(stream ===null){ //noCam인 경우
+                console.log(userName,stream);
+                usersName[socketId]=userName;
+                meetingOntrackHandler(null, userName, socketId)
+            }
+            else{
+                console.log(userName,stream);
+                usersName[socketId]=userName;
+                let pc = createReceiverPeerConnection(socketId, userName, 'meeting', meetingOntrackHandler);
+                let offer = await createReceiverOffer(pc);
+                setTimeout(500);
+                receivePCs['meeting'][socketId] = pc;
+        
+                await socket.emit("receiver_offer", {
+                    offer,
+                    receiverSocketId: socket.id,
+                    senderSocketId: socketId,
+                    purpose: 'meeting',
+                });	
+            }
         }
     } catch(err) {
         console.error(err);
@@ -202,26 +219,36 @@ async function meetingAllUsersHandler(message) {   //자신을 제외한 모든 
 }
 
 async function meetingUserEnterHandler(message) {   //누군가 들어왔을 때
-    try {
-        let pc = createReceiverPeerConnection(message.socketId, message.userName, 'meeting', meetingOntrackHandler);
-        let offer = await createReceiverOffer(pc);
+    if(message.stream ===null){ //noCam인 경우
         usersName[message.socketId]=message.userName;
-        receivePCs['meeting'][message.socketId] = pc;
-
-        await socket.emit("receiver_offer", {
-            offer,
-            receiverSocketId: socket.id,
-            senderSocketId: message.socketId,
-            purpose: 'meeting',
-        });
+        meetingOntrackHandler(null, message.userName, message.socketId)
 
         document.getElementsByClassName('c_r')[0].innerHTML = ++numOfUsers + '명';
         document.getElementById('num_user_span').innerHTML = numOfUsers + '명';
-	    
-	check_enter_1_1(message.socketId);    
-	    
-    } catch (error) {
-        console.error(error);
+        check_enter_1_1(message.socketId); 
+    }
+    else{
+        try {
+            let pc = createReceiverPeerConnection(message.socketId, message.userName, 'meeting', meetingOntrackHandler);
+            let offer = await createReceiverOffer(pc);
+            usersName[message.socketId]=message.userName;
+            receivePCs['meeting'][message.socketId] = pc;
+
+            await socket.emit("receiver_offer", {
+                offer,
+                receiverSocketId: socket.id,
+                senderSocketId: message.socketId,
+                purpose: 'meeting',
+            });
+
+            document.getElementsByClassName('c_r')[0].innerHTML = ++numOfUsers + '명';
+            document.getElementById('num_user_span').innerHTML = numOfUsers + '명';
+            
+            check_enter_1_1(message.socketId);    
+            
+        } catch (error) {
+            console.error(error);
+        }
     }
 }
 
@@ -234,11 +261,11 @@ function meetingUserExitHandler(message) {  //누군가 나갔을 때
     document.getElementsByClassName('c_r')[0].innerHTML = --numOfUsers + '명';
     document.getElementById('num_user_span').innerHTML = numOfUsers + '명';
 
-    receivePCs[message.purpose][socketId].close();
-    delete receivePCs[message.purpose][socketId];
-    delete userStreams[message.purpose][socketId];
-    delete receiveVideos[message.purpose][socketId];
-    delete usersName[socketId];
+    try{receivePCs[message.purpose][socketId].close();}catch(e){;}
+    try{delete receivePCs[message.purpose][socketId];}catch(e){;}
+    try{delete userStreams[message.purpose][socketId];}catch(e){;}
+    try{delete receiveVideos[message.purpose][socketId];}catch(e){;}
+    try{delete usersName[socketId];}catch(e){;}
     
     //var exitUserElement = document.getElementsByClassName(socketId)[0];
     //exitUserElement.parentNode.removeChild(exitUserElement);

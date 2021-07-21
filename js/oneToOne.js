@@ -232,14 +232,14 @@ function mute_1_1() {
 function unmute() {
     for(var i=0; i < mute_list.length; i++) {
         key = mute_list[i];
-        userStreams['meeting'][key].getAudioTracks()[0].enabled=true;
+        try{userStreams['meeting'][key].getAudioTracks()[0].enabled=true;}catch(e){console.error(e);}
     }
 }
 
 function mute() {
     for(var i=0; i < mute_list.length; i++) {
         key = mute_list[i];
-        userStreams['meeting'][key].getAudioTracks()[0].enabled=false;
+        try{userStreams['meeting'][key].getAudioTracks()[0].enabled=false;}catch(e){console.error(e);}
     }
 }
 

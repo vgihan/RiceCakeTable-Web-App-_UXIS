@@ -61,7 +61,7 @@ let shareUserId={};   //해당 room의 화면공유자의 id를 가짐
 
 let oneoneUserId = {}
 
-fs.readdir(__dirname+"/uploads", function(error, filelist){
+fs.readdir(__dirname+"/uploads", function(error, filelist){ //서버 켜지면 upload 파일 삭제
     try {
         for(var i=0; i<filelist.length; i++){
             delete_directory(__dirname+'/uploads/'+filelist[i]);
@@ -257,7 +257,7 @@ io.on('connection', function(socket) {
 
             receivePCs[message.purpose][socketId] = pc;
 
-	    if(message.purpose== 'share'){ //share가 목적인 경우 share화면의 stream의 오퍼를 받는것까진 성공했으니 switch를 바꿔줌
+	        if(message.purpose== 'share'){ //share가 목적인 경우 share화면의 stream의 오퍼를 받는것까진 성공했으니 switch를 바꿔줌
                 shareSwitch[users[socket.id]['room_id']] = true;
                 shareUserId[users[socket.id]['room_id']]=socket.id;
             }
@@ -338,6 +338,18 @@ io.on('connection', function(socket) {
         }
     });
 
+    //노캠 사용자 입장
+    socket.on("noCam",function (data){       
+        userStreams['meeting'][socket.id] = null;
+        socket.broadcast.to(data.roomId).emit("user_enter", { //노캠 사용자의 접속을 알림
+            socketId: socket.id,
+            roomId: data.roomId,
+            userName: data.userName,
+            purpose: 'meeting',
+            stream : null
+        });
+    });
+
 
     //통신 종료
     socket.on("meeting_disconnect", () => {
@@ -374,7 +386,7 @@ io.on('connection', function(socket) {
                 delete rooms[roomId];
                 delete roomList[roomId];
                 delete numOfUsers[roomId];
-		delete oneoneUserId[roomId];
+		        delete oneoneUserId[roomId];
             }
 
             if(roomList[roomId]===undefined){
@@ -528,8 +540,10 @@ io.on('connection', function(socket) {
                 });
             }
         }
-        if (socket.id == rooms[message.roomId]['room_leader']) oneoneUserId[message.roomId] = message.target
-        else oneoneUserId[message.roomId] = socket.id
+        if (socket.id == rooms[message.roomId]['room_leader']) 
+            oneoneUserId[message.roomId] = message.target
+        else 
+            oneoneUserId[message.roomId] = socket.id
     
     });
 	
@@ -569,7 +583,6 @@ io.on('connection', function(socket) {
                 others.push(key);
             }
         }
-        console.log(others);
         socket.emit("mute_list_request", {others : others});
     });
 
@@ -616,7 +629,8 @@ io.on('connection', function(socket) {
         console.log("share sendPCs:",sendPCs['share'])
         console.log(data," receivePCs:",receivePCs[data])
         console.log("share receivePCs:",receivePCs['share'])
-        console.log("userStreams:",userStreams['share'])
+        console.log("share userStreams:",userStreams['share'])
+        console.log("userStreams:",userStreams[data])
         //console.log("roomList",roomList);
         console.log("users",users)
         console.log("roomList:",roomList)
@@ -640,6 +654,7 @@ io.on('connection', function(socket) {
         //shareSwitch[users[socket.id]['room_id']] = true;       //여기서 해주려다가 공유를 취소해도 true가 되는 에러를 방지하기위해 sender_offer로 옮김
         //shareUserId[users[socket.id]['room_id']]=socket.id;
     });
+
 });
 
 function createSenderPeerConnection(receiverSocketId, senderSocketId, stream, purpose) {
@@ -730,6 +745,7 @@ function meetingOntrackHandler(stream, socket, roomId, userName) {
         roomId: roomId,
         userName: userName,
         purpose: 'meeting',
+        stream : stream
     });
     
     //이전 채팅 보내기 
@@ -787,6 +803,7 @@ function meetingJoinRoomHandler(message, socket) {
             rows.push({
                 socket_id: key,
                 user_name: users[key]['user_name'],
+                stream : userStreams['meeting'][key]
             });
         }
         if(rows.length !== 0) {
