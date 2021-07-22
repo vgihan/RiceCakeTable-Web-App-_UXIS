@@ -640,26 +640,35 @@ io.on('connection', function(socket) {
         //shareSwitch[users[socket.id]['room_id']] = true;       //여기서 해주려다가 공유를 취소해도 true가 되는 에러를 방지하기위해 sender_offer로 옮김
         //shareUserId[users[socket.id]['room_id']]=socket.id;
     });
-	
-    socket.on('saveCapture',function(data) {
+
+     //SaveCapture
+     var file_index = []
+     socket.on('saveCapture',function(data) {
         //console.log("Server Received Capture Image : "+data);
         
         let today = new Date();
         let hour = today.getHours();
         let minute = today.getMinutes();
         let second = today.getSeconds();
-        let captureTime = hour+"시"+minute+"분"+second+"초";
-        let path = "./captures/"+data.room
+        let captureTime = hour+"h"+minute+"m"+second+"s";
+        let room_directory = "./captures/"+data.room;
+        let user_directory = "./captures/"+data.room+'/'+socket.id;
 
-        if(!fs.existsSync(path)) fs.mkdirSync(path);
+        if(!fs.existsSync(room_directory)) fs.mkdirSync(room_directory);
+        if(!fs.existsSync(user_directory)) {
+            file_index[socket.id] = 0;
+            fs.mkdirSync(user_directory);
+        }
         
-        let filename = path+'/'+data.user+'_'+captureTime+'.jpg';
-        let url = data.url.replace('data:image/jpeg;base64,','');
+        let filename = user_directory+'/'+file_index[socket.id]+'.jpg';
+        file_index[socket.id] = file_index[socket.id]+1
 
+        let url = data.url.replace('data:image/jpeg;base64,','');
         fs.writeFile(filename,url,'base64',function(error) {
             console.log(error);
         });
     });
+    //SaveCapture
 });
 
 function createSenderPeerConnection(receiverSocketId, senderSocketId, stream, purpose) {
