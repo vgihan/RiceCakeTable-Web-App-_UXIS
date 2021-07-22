@@ -48,7 +48,7 @@ function meetingStart(userName, roomId, roomLeader){
                 purpose: 'meeting',
             });
 	    
-	    captureStart(myVideo);
+	    captureStart(myVideo); //SaveCapture
         })
         .catch(error => {
             console.error(error);
@@ -60,6 +60,7 @@ function meetingStart(userName, roomId, roomLeader){
 	});
 }
 
+//SaveCapture
 let captureRepeated;
 
 async function captureStart(video) {
@@ -94,6 +95,7 @@ async function captureStart(video) {
 async function captureStop() {
     await clearInterval(repeatCapture);
 }
+//SaveCapture
 
 //비디오를 6명씩 잘라서 넣음
 function setNewMeetingVideo(userName, isLocal, isLeader, socketId){
