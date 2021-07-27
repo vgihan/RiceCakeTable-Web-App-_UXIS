@@ -115,7 +115,7 @@ body{font-family:"GmarketSans", "Noto Sans",sans-serif;  font-size:1.6rem; color
 .cont .slide_box ul li .v_view{position:relative; overflow:hidden; cursor:pointer; width:100%; height:360px; background:#000; border-radius:5px;}
 .cont .slide_box ul li .v_view:hover .chat_1_1{opacity:1; transition: all 0.4s;}
 .cont .slide_box ul li .v_view img{width:100%;}
-.cont .slide_box ul li .v_view video { width:100%}
+.cont .slide_box ul li .v_view video { width:100%; position:absolute; bottom:0; left:0;}
 .cont .slide_box ul li .v_view .info_ctxt{position:absolute; bottom:5%; left:4%; color: #fff;  font-weight: 600;  font-size: 1.3rem; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;}
 .cont .slide_box ul li .v_view .info_ctxt .nicknm{width: 100%; min-width: 84px; height: 36px; line-height: 36px; background-color: rgba(51,51,51,0.5); background-image: url(../img/icon_nicknm.png);  background-repeat: no-repeat; background-position: 12px; padding: 0 15px 0 30px; border-radius: 5px;}
 .cont .slide_box ul li .v_view .info_ctxt02{position:absolute; bottom:5%; right:4%; color: #fff;  font-weight: 600;  font-size: 1.3rem; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;}
@@ -168,7 +168,8 @@ body{font-family:"GmarketSans", "Noto Sans",sans-serif;  font-size:1.6rem; color
 .self_view .info_ctxt .nicknm{width: 100%; min-width: 84px; height: 36px; line-height: 36px; background-color: rgba(51,51,51,0.5); background-image: url(../img/icon_nicknm.png);  background-repeat: no-repeat; background-position: 12px; padding: 0 15px 0 30px; border-radius: 5px;}
 .cont .view_all{width: 100%; max-height: calc(100vh - 70px); height: 100vh; overflow: hidden; position: relative;}
 .cont .view_all div{position: relative; width: 100%; height: 0; padding-bottom: 46.25%;}
-.cont .view_all div video{ position: absolute; top: 0; left: 0; width: 100%; height: 100%;}
+.cont .view_all div video{ position: absolute; bottom: 0; left: 0; width: 100%;}
+/*.cont .view_all div video{ position: absolute; top: 0; left: 0; width: 100%; height: 100%;}*/
 .cont .view_all .info_ctxt .target_nicknm{position: absolute; left: 50%; bottom: -55px;  width: 100%; transform: translate(-50%, 0);} /*#11*/
 
 /*
