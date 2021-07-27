@@ -105,9 +105,11 @@ body{font-family:"GmarketSans", "Noto Sans",sans-serif;  font-size:1.6rem; color
 /*푸터*/
 .footer{padding: 0 45px; color: #fff; font-size: 1rem;  letter-spacing: 0;  font-weight: 500;  opacity: 0.5;}
 .footer.ty01{position:absolute; bottom:35px;}
+.f_pd_b{padding-bottom: 20px;}
 
 /* 회의화면단 */
 .cont{}
+.n_add{height: auto; background: #505050; }
 .cont .inner{width: 100%; padding:30px 45px; margin: 0 auto; position:relative;}
 .cont .slide_box ul{width:100%; overflow:hidden;}
 .cont .slide_box ul li{float: left; border-radius: 5px; width: calc(33.333% - 60px / 3); margin: 0 0 30px 30px;}
@@ -140,7 +142,7 @@ body{font-family:"GmarketSans", "Noto Sans",sans-serif;  font-size:1.6rem; color
 }
 
 /* 1:1대화 */
-.cont .chat1_1_cc{position:absolute; top:90px; left:45px; width: 85px; height: 105px;  border-radius: 5px;  box-sizing: border-box;  padding: 15px 10px;  background: #323232;  color: #ffcc00; font-size:1.3rem; font-weight:500; line-height:1.2;}
+.cont .chat1_1_cc{position:absolute; top:90px; left:45px; width: 85px; height: auto;  border-radius: 5px;  box-sizing: border-box;  padding: 15px 10px;  background: #323232;  color: #ffcc00; font-size:1.3rem; font-weight:500; line-height:1.2;}
 .cont .chat1_1_cc a{display: block; width: 100%; height: 28px; line-height: 30px; color: #323232; background: #ffcc00; border-radius: 5px; text-align: center; box-sizing: border-box; margin-top: 2px;}
 .cont .view_lbox{position:absolute; top:90px; right:45px;}
 .cont .view_lbox video { width:100%}
