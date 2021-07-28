@@ -173,7 +173,7 @@ function meetingOutOntrackHandler(stream, userName, senderSocketId) {  //사용�
     else{
         receiveVideos['meeting'][senderSocketId]=setNewMeetingVideo(userName, senderSocketId === 'myId', (senderSocketId === roomLeader ), senderSocketId);
     }
-    if(senderSocketId == oneoneUserId1 || senderSocketId ==oneoneUserId2) setOther_come(senderSocketId);
+    if(senderSocketId == oneoneUserId1 || senderSocketId ==oneoneUserId2) receiveVideos['meeting'][senderSocketId].srcObject = stream; //setOther_come(senderSocketId);
     else receiveVideos['meeting'][senderSocketId].srcObject = stream;
     //console.log(stream);
 	
