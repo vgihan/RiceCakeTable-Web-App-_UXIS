@@ -85,6 +85,11 @@ app.get('/dashboard', (request, response) => {
 app.post('/login', (request, response) => {
     var requestRoomId = request.body.input_rm;
     var requestUserName = request.body.input_nm;
+	
+    if(users[rooms[requestRoomId]['room_leader']]==undefined){
+        response.redirect('/');
+        return;
+    }
     
     if(!roomList[requestRoomId]) {
         response.redirect('/');
