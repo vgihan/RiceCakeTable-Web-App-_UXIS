@@ -252,7 +252,7 @@ io.on('connection', function(socket) {
     socket.on("sender_offer", async (message) => {
         try {
             var offer = message.offer;
-            var socketId = message.senderSocketId;
+            var socketId = socket.id;//message.senderSocketId;
             var roomId = message.roomId;
             var userName = message.userName;
             
