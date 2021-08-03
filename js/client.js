@@ -215,7 +215,7 @@ async function createReceiverOffer(pc) {
     }
 }
 
-//서버입장에서 받는 역할의 peerConnection 객체에서 수신한 candidate 메시지
+//받는 역할의 peerConnection 객체에서 수신한 candidate 메시지
 socket.on("get_receiver_candidate", (message) => {
     try {
         let pc = receivePCs[message.purpose][message.id];
@@ -227,7 +227,7 @@ socket.on("get_receiver_candidate", (message) => {
     }
 });
 
-//서버입장에서 보내는 역할의 peerConnection 객체에서 수신한 candidate 메시지
+//보내는 역할의 peerConnection 객체에서 수신한 candidate 메시지
 socket.on("get_sender_candidate", (message) => {
     try{
         let pc = sendPC[message.purpose];
