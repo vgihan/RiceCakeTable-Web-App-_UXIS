@@ -129,6 +129,17 @@ app.post('/make-meeting', (request, response) => {
     let roomId = request.body.room_id;
     let roomName = request.body.input_rm;
     let userName = request.body.input_nm;
+    let newRoomId = request.body.new_room_id;
+    
+    if(newRoomId !=='')
+        roomId = newRoomId;
+
+    if(roomList[roomId] !== undefined){
+        response.render('select_new_meeting.ejs',{
+            preRoomId:roomId
+        })
+        return;
+    }
 
     roomList[roomId] = {};
     rooms[roomId] = {
@@ -150,6 +161,17 @@ app.post('/make-seminar', (request, response) => {
     let roomId = request.body.room_id;
     let roomName = request.body.input_rm;
     let userName = request.body.input_nm;
+    let newRoomId = request.body.new_room_id;
+    
+    if(newRoomId !=='')
+        roomId = newRoomId;
+
+    if(roomList[roomId] !== undefined){
+        response.render('select_new_seminar.ejs',{
+            preRoomId:roomId
+        })
+        return;
+    }
 
     roomList[roomId] = {};
     rooms[roomId] = {
@@ -661,8 +683,6 @@ io.on('connection', function(socket) {
         if(shareSwitch[users[socket.id]['room_id']]) return;
 
         io.to(socket.id).emit("share_possible");
-        //shareSwitch[users[socket.id]['room_id']] = true;       //여기서 해주려다가 공유를 취소해도 true가 되는 에러를 방지하기위해 sender_offer로 옮김
-        //shareUserId[users[socket.id]['room_id']]=socket.id;
     });
 
     socket.on('reqUserInfo',function (data){ //보여줄 정보 전달
@@ -834,7 +854,7 @@ function meetingJoinRoomHandler(message, socket) {
             });
         }else{
             io.to(message.senderSocketId).emit("myId");
-            console.log("@@@@@@@@@@@@@@@@@@@@@");
+            //console.log("@@@@@@@@@@@@@@@@@@@@@");
         }
         socket.join(message.roomId);
         roomList[message.roomId][message.senderSocketId] = 1;

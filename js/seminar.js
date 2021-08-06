@@ -4,9 +4,9 @@ let userEnterHandler = seminarUserEnterHandler;
 let userExitHandler = seminarUserExitHandler;
 let startFunction = seminarStart;
 
-function browserDisconnect() {
-    socket.emit("seminar_disconnect");
-}
+//function browserDisconnect() {
+//    socket.emit("seminar_disconnect");
+//}
 
 function seminarStart(userName, roomId, leader) {
     roomLeader = leader;

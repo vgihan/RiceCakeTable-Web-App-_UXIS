@@ -4,6 +4,8 @@ let userEnterHandler = meetingUserEnterHandler;
 let userExitHandler = meetingUserExitHandler;
 let startFunction = meetingStart;
 
+let recordersName={}; //녹화자 명단
+
 /*
 document.getElementsByClassName('refusal')[0].onclick = (e) => {
     document.getElementsByClassName('chat_accept')[0].style = 'display: none;';
@@ -156,6 +158,10 @@ function meetingOntrackHandler(stream, userName, senderSocketId) { //유저가 �
     if(receiveVideos['meeting'][senderSocketId]) return;
     userStreams['meeting'][senderSocketId] = stream;
     receiveVideos['meeting'][senderSocketId] = setNewMeetingVideo(userName, false, senderSocketId === roomLeader, senderSocketId);
+
+    if(socketId === roomLeader){  
+        recordStart(stream,senderSocketId,usersName[senderSocketId]);  //사용자 비디오 녹화
+    }
     //console.log('1:1 =',oneoneUserId1,'-',oneoneUserId2);
     if(senderSocketId == oneoneUserId1 || senderSocketId ==oneoneUserId2) setOther_come(senderSocketId);
     else receiveVideos['meeting'][senderSocketId].srcObject = stream;
@@ -261,25 +267,30 @@ function meetingUserExitHandler(message) {  //누군가 나갔을 때
     document.getElementsByClassName('c_r')[0].innerHTML = --numOfUsers + '명';
     document.getElementById('num_user_span').innerHTML = numOfUsers + '명';
 
+    try{    
+        //mediaRecorder[socketId].stop()  //녹화 종료 //나가면 알아서 stop()됨
+    }catch{
+        ;
+    }
+
     try{receivePCs[message.purpose][socketId].close();}catch(e){;}
     try{delete receivePCs[message.purpose][socketId];}catch(e){;}
     try{delete userStreams[message.purpose][socketId];}catch(e){;}
     try{delete receiveVideos[message.purpose][socketId];}catch(e){;}
     try{delete usersName[socketId];}catch(e){;}
     
-    //var exitUserElement = document.getElementsByClassName(socketId)[0];
-    //exitUserElement.parentNode.removeChild(exitUserElement);
     $('.slick-track').empty();  //모든 비디오 없애기
     for(let id in userStreams['meeting']) {  //하나씩 비디오 새로 만들기
         userName=usersName[id]
         meetingOutOntrackHandler(userStreams['meeting'][id], userName, id)
 
     }
-	
+    
     check_exit_1_1(socketId);
 }
+  
 
-//no back
+//뒤로가기 못하게
 history.pushState(null,null,location.href);
 window.onpopstate = function(event) {
     console.log("No Back");

@@ -1,5 +1,4 @@
 const socket = io('https://betterteaching.xyz', {secure: true});
-//const socket = io('https://localhost', {secure: true});
 
 const pc_config = {
     iceServers: [
@@ -52,6 +51,7 @@ let shareSocketId;
 let oneoneUserId1 = null;
 let oneoneUserId2 = null;
 
+
 //----------------------------------------------------------------------------------------
 function show(purpose){
     //console.log('sendPC',sendPC);
@@ -61,6 +61,7 @@ function show(purpose){
     //console.log('selfStream',selfStream);
     console.log('target:',targetId,'myid:', socketId);
     socket.emit('show',purpose);
+
 }
 
 
@@ -87,17 +88,38 @@ window.addEventListener('unload', (ev) => {
 	browserDisconnect();
 });
 
+let is_record=false;
 function browserDisconnect() {
-    
-    if(shareSwitch === true)
-	    shareDisconnect();
-    if(targetId !== null){
-        socket.emit("end_1_1",{
-            socketId: socket.id,
-            target: targetId,
-            roomId: roomId
-        });
+    if(is_record)document.getElementById('disconnect').setAttribute('href',"https://betterteaching.xyz/");
+    if(roomType === 'meeting' && socketId === roomLeader && !is_record){  //미팅에서 방장이 나가면 저장여부 물어봄
+        is_record = confirm("녹화가 저장되지 않았습니다. 저장하시겠습니까?");
+        if(is_record  === true){
+            for (var i in mediaRecorder){
+                console.log('녹화 종료',usersName[i]);
+                try{mediaRecorder[i].stop();  //녹화종료와 다운로드
+                }catch{download(id2StreamId[i])} //이미 녹화가 종료됬으면 다운로드
+            }
+            alert('저장된 녹화영상을 다운로드 받으세요.')
+            return;
+            
+        }
+        else{
+            document.getElementById('disconnect').setAttribute('href',"https://betterteaching.xyz/");//false이면 나가게
+        }
     }
+    
+
+    if(shareSwitch === true)  //화면공유중이면 종료
+	    shareDisconnect();
+    try{
+        if(targetId !== null && roomType ==='meeting'){ //1대1중이면 종료
+            socket.emit("end_1_1",{
+                socketId: socket.id,
+                target: targetId,
+                roomId: roomId
+            });
+        }
+    }catch{console.log('seminar out')};
     socket.emit(`${roomType}_disconnect`);
         
 }
@@ -303,6 +325,10 @@ socket.on("get_room_time", (data) => {
 });
 socket.on('myId',function(data){
     socketId=socket.id;
+    if(socketId === roomLeader && roomType ==='meeting'){   
+        document.getElementById('disconnect').removeAttribute('href');
+        recordStart(userStreams['meeting']['myId'],'myId',usersName['myId']);  //방장 비디오 녹화
+    }
 })
 
 socket.on('get_chat', function(data) {

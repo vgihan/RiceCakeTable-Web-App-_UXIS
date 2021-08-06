@@ -1,0 +1,53 @@
+*서버 접속 (Putty)
+Host Name = betterteaching@52.231.182.69	52.231.182.69
+SSH Key = SSH - Auth – azure_private.ppk
+ID = betterteaching
+
+*서버 Foreground 실행
+sudo node server.js
+
+*서버 Background 실행
+sudo nohup node server.js &
+
+*데몬 죽이기
+kill -9 [ process id ]
+
+*프로세서와 프로세서 포트 확인 (443 포트 접속 수 확인)
+netstat -tnlp | grep 443
+ps -aux | grep 443
+ps aux | grep node
+ps -ef | grep server.js
+ 
+
+*서버 파일 추가
+git clone -b [ branch name ] --single-branch [ repository address ]
+
+*데이터 베이스 (azure 3306 포트에 MySQL 실행)
+sudo apt install mysql
+sudo mysql -uroot -p
+
+User : root / Password : Uxis100!
+
+*깃 헙
+git clone "주소"
+git pull "별명" "브랜치"
+
+git remote add "별명" "주소"
+git add [ 파일들 or ./ ]
+git commit -m "메세지"
+git push "별명" "브랜치 이름"
+
+
+npm i ejs --save
+npm i node.js --save
+npm i node-pre-gyp --save
+npm i wrtc --save
+npm i socket.io --save
+npm i socket.io-client --save
+npm i express --save
+npm i mysql --save
+npm i formidable --save
+
+*최종 파일 GitHub = https://github.com/vgihan/RiceCakeTable-Web-App-_UXIS.git
+
+

@@ -1,6 +1,7 @@
 //let ontrackSwitch = false;
 
 window.addEventListener("beforeunload", function(e){
+    console.log('창닫기 누름');
     browserDisconnect()
     socket.emit("ex")
     return 0;
