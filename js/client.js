@@ -90,16 +90,17 @@ window.addEventListener('unload', (ev) => {
 });
 
 function browserDisconnect() {
-    
     if(shareSwitch === true)
 	    shareDisconnect();
-    if(targetId !== null){
-        socket.emit("end_1_1",{
-            socketId: socket.id,
-            target: targetId,
-            roomId: roomId
-        });
-    }
+    try{
+        if(targetId !== null && roomType ==='meeting'){
+            socket.emit("end_1_1",{
+                socketId: socket.id,
+                target: targetId,
+                roomId: roomId
+            });
+        }
+    }catch{console.log('seminar out')};
     socket.emit(`${roomType}_disconnect`);
         
 }
