@@ -90,6 +90,7 @@ window.addEventListener('unload', (ev) => {
 
 let is_record=false;
 function browserDisconnect() {
+    if(Object.keys(mediaRecorder).length<1) is_record=true;
     if(is_record)document.getElementById('disconnect').setAttribute('href',"https://betterteaching.xyz/");
     if(roomType === 'meeting' && socketId === roomLeader && !is_record){  //미팅에서 방장이 나가면 저장여부 물어봄
         is_record = confirm("녹화가 저장되지 않았습니다. 저장하시겠습니까?");
