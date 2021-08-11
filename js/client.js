@@ -90,25 +90,25 @@ window.addEventListener('unload', (ev) => {
 
 let is_record=false;
 function browserDisconnect() {
-    if(Object.keys(mediaRecorder).length<1) is_record=true;
-    if(is_record)document.getElementById('disconnect').setAttribute('href',"https://betterteaching.xyz/");
-    if(roomType === 'meeting' && socketId === roomLeader && !is_record){  //미팅에서 방장이 나가면 저장여부 물어봄
-        is_record = confirm("녹화가 저장되지 않았습니다. 저장하시겠습니까?");
-        if(is_record  === true){
-            for (var i in mediaRecorder){
-                console.log('녹화 종료',usersName[i]);
-                try{mediaRecorder[i].stop();  //녹화종료와 다운로드
-                }catch{download(id2StreamId[i])} //이미 녹화가 종료됬으면 다운로드
+    if(roomType == 'meeting'){
+        if(Object.keys(mediaRecorder).length<1) is_record=true;
+        if(is_record)document.getElementById('disconnect').setAttribute('href',"https://betterteaching.xyz/");
+        if(roomType === 'meeting' && socketId === roomLeader && !is_record){  //미팅에서 방장이 나가면 저장여부 물어봄
+            is_record = confirm("녹화가 저장되지 않았습니다. 저장하시겠습니까?");
+            if(is_record  === true){
+                for (var i in mediaRecorder){
+                    console.log('녹화 종료',usersName[i]);
+                    try{mediaRecorder[i].stop();  //녹화종료와 다운로드
+                    }catch{download(id2StreamId[i])} //이미 녹화가 종료됬으면 다운로드
+                }
+                alert('저장된 녹화영상을 다운로드 받으세요.')
+                return;
             }
-            alert('저장된 녹화영상을 다운로드 받으세요.')
-            return;
-            
-        }
-        else{
-            document.getElementById('disconnect').setAttribute('href',"https://betterteaching.xyz/");//false이면 나가게
+            else{
+                document.getElementById('disconnect').setAttribute('href',"https://betterteaching.xyz/");//false이면 >나가게
+            }
         }
     }
-    
 
     if(shareSwitch === true)  //화면공유중이면 종료
 	    shareDisconnect();
