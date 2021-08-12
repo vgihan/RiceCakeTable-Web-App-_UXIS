@@ -159,7 +159,7 @@ function meetingOntrackHandler(stream, userName, senderSocketId) { //유저가 �
     userStreams['meeting'][senderSocketId] = stream;
     receiveVideos['meeting'][senderSocketId] = setNewMeetingVideo(userName, false, senderSocketId === roomLeader, senderSocketId);
 
-    if(socketId === roomLeader){  
+    if(socketId === roomLeader && stream !== null){  
         recordStart(stream,senderSocketId,usersName[senderSocketId]);  //사용자 비디오 녹화
     }
     //console.log('1:1 =',oneoneUserId1,'-',oneoneUserId2);
