@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="Generator" content="EditPlus®" />
+        <meta name="Author" content="" />
+        <meta name="Keywords" content="" />
+        <meta name="Description" content="" />
+        <title>BETTER TEACHING</title>
+        <!--css-->
+        <link rel="stylesheet" href="../css/reset.css" />
+        <!--<link rel="stylesheet" href="../css/font.css" />-->
+        <link rel="stylesheet" href="../css/layout.css" />
+        <link rel="stylesheet" href="../css/jquery.mCustomScrollbar.min.css" />
+		<link rel="stylesheet" href="../css/slick.css" />
+        <!--js-->
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="../js/jquery-3.4.1.min.js"></script>
+		<script src="../js/slick.min.js"></script>
+        <script src="../js/jquery.mCustomScrollbar.js"></script>
+        <script src="../js/layout.js"></script>
+    </head>
+    <body>
+        
+        <!--<button onclick = 'showUserInfo()'>눌러서 정보보기</button>-->
+        <div id = 'user_info'>
+            <p>hihihi</p>
+        </div>
+        
+        <script>
+            const socket = io('https://betterteaching.xyz', {secure: true});
+            var user_info=document.getElementById('user_info');
+            showUserInfo()
+            
+            
+            function showUserInfo(){
+                $('#user_info').empty();
+                socket.emit('reqUserInfo');
+            }
+
+            function setRoomsInfo(rooms){
+                var rooms_div = document.createElement('div');
+                var rooms_ul = document.createElement('ul');
+                rooms_ul.innerHTML='<h1>현재 생성되어 있는 방:</h1>';
+                for(var i in rooms){
+                    rooms_ul.innerHTML+=`<li><h3>${i}</h3></li>`;
+
+                }
+                
+                rooms_div.appendChild(rooms_ul);
+                user_info.appendChild(rooms_div);
+            }
+
+            function setUsersInfo(rooms,roomList,numOfUsers){
+                var users_div = document.createElement('div');
+
+                users_div.innerHTML='<br><br>방의 유저들의 id:';
+                for(i in roomList){
+                    var users_ul = document.createElement('ul');
+                    users_ul.innerHTML=i+'방 '+numOfUsers[i]+'명';
+                    for(j in roomList[i]){
+                        users_ul.innerHTML+=`<li><h3>${j}</h3></li>`;
+                        //console.log('j:',j);
+                    }
+                    users_div.appendChild(users_ul);
+                }
+                
+                user_info.appendChild(users_div);
+            }
+
+            socket.on('ansUserInfo',function (data){
+                
+                setRoomsInfo(data.rooms);
+                setUsersInfo(data.rooms,data.roomList,data.numOfUsers);
+            })
+
+        </script>
+
+    </body>
+</html>
