@@ -50,7 +50,7 @@ function meetingStart(userName, roomId, roomLeader){
                 purpose: 'meeting',
             });
 
-            captureStart(myVideo);  //내 영상 캡처
+            //captureStart(myVideo);  //내 영상 캡처
         })
         .catch(error => { //noCam인 경우
             console.error(error);
