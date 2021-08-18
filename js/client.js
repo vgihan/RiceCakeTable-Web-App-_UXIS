@@ -92,7 +92,7 @@ let is_record=false;
 function browserDisconnect() {
     if(roomType == 'meeting'){
         if(Object.keys(mediaRecorder).length<1) is_record=true;
-        if(is_record)document.getElementById('disconnect').setAttribute('href',"https://betterteaching.xyz/");
+        //if(is_record)document.getElementById('disconnect').setAttribute('href',"https://betterteaching.xyz/");
         if(roomType === 'meeting' && socketId === roomLeader && !is_record){  //미팅에서 방장이 나가면 저장여부 물어봄
             is_record = confirm("녹화가 저장되지 않았습니다. 저장하시겠습니까?");
             if(is_record  === true){
@@ -104,9 +104,9 @@ function browserDisconnect() {
                 alert('저장된 녹화영상을 다운로드 받으세요.')
                 return;
             }
-            else{
-                document.getElementById('disconnect').setAttribute('href',"https://betterteaching.xyz/");//false이면 나가게
-            }
+            //else{
+            //    document.getElementById('disconnect').setAttribute('href',"https://betterteaching.xyz/");//false이면 나가게
+            //}
         }
     }
     
@@ -328,7 +328,7 @@ socket.on("get_room_time", (data) => {
 socket.on('myId',function(data){
     socketId=socket.id;
     if(socketId === roomLeader && roomType ==='meeting' && userStreams['meeting']['myId']!=null){   
-        document.getElementById('disconnect').removeAttribute('href');
+        //document.getElementById('disconnect').removeAttribute('href');
         recordStart(userStreams['meeting']['myId'],'myId',usersName['myId']);  //방장 비디오 녹화
     }
 })
