@@ -327,7 +327,7 @@ socket.on("get_room_time", (data) => {
 });
 socket.on('myId',function(data){
     socketId=socket.id;
-    if(socketId === roomLeader && roomType ==='meeting'){   
+    if(socketId === roomLeader && roomType ==='meeting' && userStreams['meeting']['myId']!=null){   
         document.getElementById('disconnect').removeAttribute('href');
         recordStart(userStreams['meeting']['myId'],'myId',usersName['myId']);  //방장 비디오 녹화
     }
