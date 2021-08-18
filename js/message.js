@@ -76,5 +76,5 @@ function getChat(data) {
         chat_inner.innerHTML += `<li><h1>${data[i].userName}</h1><p>${data[i].msg}</p></li>`
     }
 
-    chatScrollDown();
+    //chatScrollDown();
 }
