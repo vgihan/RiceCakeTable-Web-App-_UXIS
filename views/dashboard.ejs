@@ -52,7 +52,7 @@
                 user_info.appendChild(rooms_div);
             }
 
-            function setUsersInfo(rooms,roomList,numOfUsers){
+            function setUsersInfo(rooms,roomList,numOfUsers,users){
                 var users_div = document.createElement('div');
 
                 users_div.innerHTML='<br><br>방의 유저들의 id:';
@@ -60,7 +60,7 @@
                     var users_ul = document.createElement('ul');
                     users_ul.innerHTML=i+'방 '+numOfUsers[i]+'명';
                     for(j in roomList[i]){
-                        users_ul.innerHTML+=`<li><h3>${j}</h3></li>`;
+                        users_ul.innerHTML+=`<li><h3>이름 : ${users[j]['user_name']} ,&nbsp&nbsp&nbsp ID :  ${j}</h3></li>`;
                         //console.log('j:',j);
                     }
                     users_div.appendChild(users_ul);
@@ -72,7 +72,7 @@
             socket.on('ansUserInfo',function (data){
                 
                 setRoomsInfo(data.rooms);
-                setUsersInfo(data.rooms,data.roomList,data.numOfUsers);
+                setUsersInfo(data.rooms,data.roomList,data.numOfUsers,data.users);
             })
 
         </script>
